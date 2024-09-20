@@ -6,7 +6,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
 import DocumentPicker from 'react-native-document-picker';
-import RNFetchBlob from 'rn-fetch-blob';
+import RNBlobUtil from 'react-native-blob-util';
 import Logo from '../assets/Logo.png';
 
 function RegisterCarScreen({ navigation }) {
@@ -59,21 +59,20 @@ function RegisterCarScreen({ navigation }) {
       const reference = storage().ref(storagePath);
       console.log('Referencia creada:', reference.fullPath);
 
+      let uploadTask;
       if (Platform.OS === 'android') {
         console.log('Subiendo archivo en Android');
-        const statResult = await RNFetchBlob.fs.stat(pdfUri);
-        console.log('Estadísticas del archivo:', statResult);
-        
-        const fileContent = await RNFetchBlob.fs.readFile(statResult.path, 'base64');
-        await reference.putString(fileContent, 'base64', { contentType: 'application/pdf' });
+        const fileContent = await RNBlobUtil.fs.readFile(pdfUri, 'base64');
+        uploadTask = reference.putString(fileContent, 'base64', { contentType: 'application/pdf' });
       } else {
         console.log('Subiendo archivo en iOS');
-        await reference.putFile(pdfUri);
+        uploadTask = reference.putFile(pdfUri);
       }
 
+      const snapshot = await uploadTask;
       console.log('Archivo subido exitosamente');
 
-      const url = await reference.getDownloadURL();
+      const url = await snapshot.ref.getDownloadURL();
       console.log('URL de descarga:', url);
 
       return { url, filename: storagePath };
