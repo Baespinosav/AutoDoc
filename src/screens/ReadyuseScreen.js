@@ -38,7 +38,9 @@ function ReadyUseScreen({ navigation }) {
       <Image source={SubaruImage} style={styles.vehicleImage} />
       <View style={styles.vehicleInfo}>
         <Text style={styles.vehicleText}>{item.marca} {item.modelo}</Text>
-        <Text style={styles.vehicleText}>{new Date(item.año).getFullYear()}</Text>
+        <Text style={styles.vehicleText}>
+          {item.año && item.año.toDate ? item.año.toDate().getFullYear() : 'Año no disponible'}
+        </Text>
       </View>
     </TouchableOpacity>
   );

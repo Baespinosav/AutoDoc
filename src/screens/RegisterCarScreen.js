@@ -1,130 +1,173 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform, SafeAreaView, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Alert, SafeAreaView, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
-import auth from '@react-native-firebase/auth';
 import DocumentPicker from 'react-native-document-picker';
-import RNBlobUtil from 'react-native-blob-util';
+import storage from '@react-native-firebase/storage';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import { useNavigation } from '@react-navigation/native';
+import RNFS from 'react-native-fs';
+import { Platform } from 'react-native';
 import Logo from '../assets/Logo.png';
 
-function RegisterCarScreen({ navigation }) {
-  const [modelo, setModelo] = useState('Impreza');
+const RegisterCar = () => {
+  const navigation = useNavigation();
   const [marca, setMarca] = useState('Subaru');
+  const [modelo, setModelo] = useState('Impreza');
   const [año, setAño] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [user, setUser] = useState(null);
-  const [pdfUri, setPdfUri] = useState(null);
-  const [pdfName, setPdfName] = useState('');
+  const [documents, setDocuments] = useState({
+    permisoCirculacion: null,
+    soap: null,
+    revisionTecnica: null
+  });
 
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(user => {
-      setUser(user);
-    });
-    return unsubscribe;
-  }, []);
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setAño(selectedDate);
+    }
+  };
 
-  const pickDocument = async () => {
+  const pickDocument = async (documentType) => {
     try {
       const result = await DocumentPicker.pick({
         type: [DocumentPicker.types.pdf],
       });
-      console.log('Documento seleccionado:', result);
-      setPdfUri(result[0].uri);
-      setPdfName(result[0].name);
+      setDocuments(prev => ({
+        ...prev,
+        [documentType]: {
+          uri: result[0].uri,
+          name: result[0].name
+        }
+      }));
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('User cancelled the picker');
       } else {
         console.error('Error al seleccionar el documento:', err);
-        Alert.alert('Error', 'No se pudo seleccionar el documento: ' + err.message);
+        Alert.alert('Error', 'No se pudo seleccionar el documento');
       }
     }
   };
 
-  const uploadPdf = async (userId) => {
-    if (!pdfUri) {
-      console.log('No se ha seleccionado ningún PDF');
+  const uploadPdf = async (documentType) => {
+    const doc = documents[documentType];
+    if (!doc) {
+      console.log(`No hay documento para ${documentType}`);
       return null;
     }
-
-    const filename = pdfName || 'documento.pdf';
-
     try {
-      const timestamp = new Date().getTime();
-      const storagePath = `vehicle_documents/${userId}/${timestamp}_${filename}`;
+      console.log(`Iniciando subida de ${documentType}...`);
+      const timestamp = Date.now();
+      const storagePath = `vehicle_documents/${auth().currentUser.uid}/${timestamp}_${doc.name}`;
       console.log('Ruta de almacenamiento:', storagePath);
 
       const reference = storage().ref(storagePath);
       console.log('Referencia creada:', reference.fullPath);
 
-      let uploadTask;
-      if (Platform.OS === 'android') {
-        console.log('Subiendo archivo en Android');
-        const fileContent = await RNBlobUtil.fs.readFile(pdfUri, 'base64');
-        uploadTask = reference.putString(fileContent, 'base64', { contentType: 'application/pdf' });
-      } else {
-        console.log('Subiendo archivo en iOS');
-        uploadTask = reference.putFile(pdfUri);
+      console.log('Preparando archivo para subir...');
+      console.log('URI del archivo:', doc.uri);
+      
+      let filePath = doc.uri;
+      if (Platform.OS === 'android' && doc.uri.startsWith('content://')) {
+        try {
+          const stat = await RNFS.stat(doc.uri);
+          filePath = stat.path;
+          console.log('Ruta del archivo en Android (desde stat):', filePath);
+        } catch (statError) {
+          console.log('Error al obtener stat:', statError);
+          // Si falla stat, intentamos copiar el archivo a una ubicación temporal
+          const tempFilePath = `${RNFS.CachesDirectoryPath}/${doc.name}`;
+          await RNFS.copyFile(doc.uri, tempFilePath);
+          filePath = tempFilePath;
+          console.log('Ruta del archivo en Android (copiado):', filePath);
+        }
       }
 
-      const snapshot = await uploadTask;
-      console.log('Archivo subido exitosamente');
+      // Verificar si el archivo existe
+      const fileExists = await RNFS.exists(filePath);
+      console.log('¿El archivo existe?', fileExists);
 
-      const url = await snapshot.ref.getDownloadURL();
-      console.log('URL de descarga:', url);
+      if (!fileExists) {
+        throw new Error('El archivo no existe en la ruta especificada');
+      }
 
-      return { url, filename: storagePath };
+      console.log('Subiendo archivo...');
+      const task = reference.putFile(filePath);
+
+      return new Promise((resolve, reject) => {
+        task.on('state_changed', 
+          (snapshot) => {
+            console.log(`${snapshot.bytesTransferred} transferidos de ${snapshot.totalBytes}`);
+          },
+          (error) => {
+            console.error('Error durante la subida:', error);
+            reject(error);
+          },
+          async () => {
+            console.log('Subida completada');
+            const url = await reference.getDownloadURL();
+            console.log('URL de descarga:', url);
+            resolve(url);
+          }
+        );
+      });
     } catch (error) {
-      console.error('Error detallado al subir el PDF:', error);
-      throw error;
+      console.error(`Error detallado al subir ${documentType}:`, JSON.stringify(error, null, 2));
+      return null;
     }
   };
 
-  const handleRegister = async () => {
-    const user = auth().currentUser;
-    if (!user) {
-      Alert.alert('Error', 'No hay usuario autenticado');
-      return;
-    }
-
+  const registerCar = async () => {
     try {
-      let pdfData = null;
-      if (pdfUri) {
-        console.log('Intentando subir PDF...');
-        console.log('URI del PDF:', pdfUri);
-        console.log('Nombre del PDF:', pdfName);
-        pdfData = await uploadPdf(user.uid);
-        console.log('Resultado de la subida del PDF:', pdfData);
+      if (!marca || !modelo || !año) {
+        Alert.alert('Error', 'Por favor, complete los campos obligatorios');
+        return;
       }
 
-      const vehicleData = {
+      const documentUrls = {};
+      const documentTypes = ['permisoCirculacion', 'soap', 'revisionTecnica'];
+
+      for (const docType of documentTypes) {
+        if (documents[docType]) {
+          const url = await uploadPdf(docType);
+          if (url) {
+            documentUrls[docType] = url;
+          } else {
+            console.log(`No se pudo subir el documento ${docType}`);
+          }
+        } else {
+          console.log(`No se seleccionó documento para ${docType}`);
+        }
+      }
+
+      const docRef = await firestore().collection('vehicles').add({
         marca,
         modelo,
-        año: año.toISOString(),
-        userId: user.uid,
-        documentoPdf: pdfData,
-      };
+        año: firestore.Timestamp.fromDate(año),
+        ...documentUrls,
+        userId: auth().currentUser.uid,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
 
-      const docRef = await firestore().collection('vehicles').add(vehicleData);
       console.log('Vehículo registrado con ID:', docRef.id);
 
-      Alert.alert('Éxito', 'Vehículo registrado correctamente');
-      navigation.goBack();
+      Alert.alert(
+        'Éxito',
+        'Vehículo registrado correctamente',
+        [{ text: 'OK', onPress: () => navigation.navigate('ReadyUse', { refreshVehicles: true }) }]
+      );
     } catch (error) {
-      console.error('Error al registrar el vehículo:', error);
+      console.error('Error al registrar vehículo:', error);
       Alert.alert('Error', 'No se pudo registrar el vehículo: ' + error.message);
     }
   };
 
-  if (!user) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text>Cargando...</Text>
-      </SafeAreaView>
-    );
-  }
+  const goBack = () => {
+    navigation.goBack();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -134,56 +177,54 @@ function RegisterCarScreen({ navigation }) {
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={marca}
-              onValueChange={(itemValue) => setMarca(itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Subaru" value="Subaru" />
-              {/* Agrega más marcas aquí si es necesario */}
-            </Picker>
-          </View>
-
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={modelo}
-              onValueChange={(itemValue) => setModelo(itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Impreza" value="Impreza" />
-              {/* Agrega más modelos aquí si es necesario */}
-            </Picker>
-          </View>
-
+          <Picker
+            selectedValue={marca}
+            style={styles.picker}
+            onValueChange={(itemValue) => setMarca(itemValue)}
+          >
+            <Picker.Item label="Subaru" value="Subaru" />
+          </Picker>
+          <Picker
+            selectedValue={modelo}
+            style={styles.picker}
+            onValueChange={(itemValue) => setModelo(itemValue)}
+          >
+            <Picker.Item label="Impreza" value="Impreza" />
+          </Picker>
           <TouchableOpacity style={styles.button} onPress={() => setShowDatePicker(true)}>
-            <Text style={styles.buttonText}>Seleccionar Año</Text>
+            <Text style={styles.buttonText}>{`Seleccionar Año: ${año.getFullYear()}`}</Text>
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
               value={año}
-              mode="date"
+              mode={'date'}
               display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(Platform.OS === 'ios');
-                if (selectedDate) setAño(selectedDate);
-              }}
+              onChange={onChangeDate}
             />
           )}
-
-          <TouchableOpacity style={styles.button} onPress={pickDocument}>
-            <Text style={styles.buttonText}>Seleccionar PDF</Text>
+          <TouchableOpacity style={styles.button} onPress={() => pickDocument('permisoCirculacion')}>
+            <Text style={styles.buttonText}>Seleccionar Permiso de Circulación</Text>
           </TouchableOpacity>
-          {pdfName ? <Text style={styles.pdfName}>Documento seleccionado: {pdfName}</Text> : null}
-
-          <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={handleRegister}>
+          {documents.permisoCirculacion && <Text style={styles.documentName}>Documento seleccionado: {documents.permisoCirculacion.name}</Text>}
+          <TouchableOpacity style={styles.button} onPress={() => pickDocument('soap')}>
+            <Text style={styles.buttonText}>Seleccionar SOAP</Text>
+          </TouchableOpacity>
+          {documents.soap && <Text style={styles.documentName}>Documento seleccionado: {documents.soap.name}</Text>}
+          <TouchableOpacity style={styles.button} onPress={() => pickDocument('revisionTecnica')}>
+            <Text style={styles.buttonText}>Seleccionar Revisión Técnica</Text>
+          </TouchableOpacity>
+          {documents.revisionTecnica && <Text style={styles.documentName}>Documento seleccionado: {documents.revisionTecnica.name}</Text>}
+          <TouchableOpacity style={styles.button} onPress={registerCar}>
             <Text style={styles.buttonText}>Registrar Vehículo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.backButton} onPress={goBack}>
+            <Text style={styles.buttonText}>Volver</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -206,35 +247,21 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
-  backButton: {
-    padding: 10,
-  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  logo: {
-    width: 150,
-    height: 150,
-  },
   formContainer: {
     width: '100%',
-  },
-  pickerContainer: {
-    backgroundColor: '#e8e8e8',
-    borderRadius: 25,
-    marginBottom: 15,
-    overflow: 'hidden',
   },
   picker: {
     height: 50,
     width: '100%',
+    backgroundColor: '#e8e8e8',
+    marginBottom: 15,
+    borderRadius: 25,
   },
   button: {
     backgroundColor: '#2c3e50',
@@ -243,21 +270,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 15,
   },
-  registerButton: {
-    backgroundColor: '#34495e',
-    marginTop: 10,
-  },
   buttonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  pdfName: {
-    marginBottom: 15,
+  documentName: {
+    marginVertical: 10,
     fontSize: 16,
-    color: '#2c3e50',
-    textAlign: 'center',
+    color: '#333',
+  },
+  backButton: {
+    backgroundColor: '#ae0404',
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 20,
   },
 });
 
-export default RegisterCarScreen;
+export default RegisterCar;

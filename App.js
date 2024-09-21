@@ -9,6 +9,7 @@ import ReadyuseScreen from './src/screens/ReadyuseScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterCarScreen from './src/screens/RegisterCarScreen';
 import VehicleDetailScreen from './src/screens/VehicleDetailScreen';
+import ChatbotScreen from './src/screens/ChatbotScreen';
 
 const Stack = createStackNavigator();
 
@@ -29,8 +30,9 @@ const App = () => {
         <Stack.Screen 
           name="VehicleDetail" 
           component={VehicleDetailScreen} 
-          options={{ title: 'Detalles del Vehículo' }}
+          options={{ headerShown: false }}
         />
+        <Stack.Screen name="Chatbot" component={ChatbotScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
