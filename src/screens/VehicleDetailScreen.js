@@ -88,6 +88,13 @@ const VehicleDetailScreen = ({ route, navigation }) => {
               <Text style={styles.buttonText}>Eliminar Vehículo</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => navigation.navigate('Chatbot', { vehicle: vehicle })}
+                      >
+                        <Text style={styles.buttonText}>CHATBOT</Text>
+                      </TouchableOpacity>
+
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
               <Text style={styles.buttonText}>Volver</Text>
             </TouchableOpacity>
