@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignora todos los warnings
+
 
 const API_KEY = 'AIzaSyBtBsTj7u59Sv2kyDRFwF_BRVWfV_UDyeU';
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -17,7 +21,7 @@ function ChatbotScreen({ route }) {
   const sendInitialMessage = async () => {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const prompt = `Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${new Date(vehicle.año).getFullYear()}. Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico.`;
-    
+
     try {
       const result = await model.generateContent(prompt);
       const response = await result.response;
@@ -56,27 +60,37 @@ function ChatbotScreen({ route }) {
   );
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={90} // Ajusta este valor según sea necesario
     >
-      <FlatList
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={item => item.id.toString()}
-        style={styles.messageList}
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Escribe tu mensaje..."
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Text style={styles.sendButtonText}>Enviar</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <FlatList
+              data={messages}
+              renderItem={renderMessage}
+              keyExtractor={item => item.id.toString()}
+              style={styles.messageList}
+              contentContainerStyle={{ paddingBottom: 100 }} // Espacio extra para el teclado
+            />
+          </ScrollView>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Escribe tu mensaje..."
+              placeholderTextColor="#999"
+            />
+            <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+              <Text style={styles.sendButtonText}>Enviar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
@@ -111,6 +125,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     backgroundColor: 'white',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   input: {
     flex: 1,
@@ -120,6 +138,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginRight: 10,
+    color: '#000', // Color del texto (negro)
   },
   sendButton: {
     backgroundColor: '#3498db',
