@@ -33,6 +33,7 @@ function LoginScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
+            placeholderTextColor="#7f8c8d"  // Cambia el color del placeholder
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -41,6 +42,7 @@ function LoginScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
+            placeholderTextColor="#7f8c8d"  // Cambia el color del placeholder
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -97,14 +99,20 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   input: {
-    backgroundColor: '#e8e8e8',
-    width: '100%',
-    height: 50,
-    borderRadius: 25,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
+      backgroundColor: '#ffffff',  // Fondo más claro para mejor visibilidad
+      width: '100%',
+      height: 50,
+      borderRadius: 25,
+      marginBottom: 15,
+      paddingHorizontal: 15,
+      fontSize: 16,
+      color: '#000',  // Texto negro para mayor contraste
+      borderWidth: 1,  // Añade un borde para que se destaque más
+      borderColor: '#ccc',  // Color del borde
+    },
+    inputPlaceholder: {
+      color: '#7f8c8d',  // Color del placeholder más oscuro
+    },
   button: {
     backgroundColor: '#2c3e50',
     padding: 15,
