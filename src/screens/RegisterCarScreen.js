@@ -182,14 +182,14 @@ const RegisterCar = () => {
             style={styles.picker}
             onValueChange={(itemValue) => setMarca(itemValue)}
           >
-            <Picker.Item label="Subaru" value="Subaru" />
+            <Picker.Item label="Subaru" value="Subaru" color="black"/>
           </Picker>
           <Picker
             selectedValue={modelo}
             style={styles.picker}
             onValueChange={(itemValue) => setModelo(itemValue)}
           >
-            <Picker.Item label="Impreza" value="Impreza" />
+            <Picker.Item label="Impreza" value="Impreza" color="black" />
           </Picker>
           <TouchableOpacity style={styles.button} onPress={() => setShowDatePicker(true)}>
             <Text style={styles.buttonText}>{`Seleccionar Año: ${año.getFullYear()}`}</Text>
