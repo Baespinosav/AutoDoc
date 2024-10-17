@@ -79,24 +79,28 @@ function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Nombre"
+            placeholderTextColor="#999"  // Color del placeholder
             value={firstName}
             onChangeText={setFirstName}
           />
           <TextInput
             style={styles.input}
             placeholder="Apellido"
+            placeholderTextColor="#999"  // Color del placeholder
             value={lastName}
             onChangeText={setLastName}
           />
           <TextInput
             style={styles.input}
             placeholder="Nombre de usuario"
+            placeholderTextColor="#999"  // Color del placeholder
             value={username}
             onChangeText={setUsername}
           />
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
+            placeholderTextColor="#999"  // Color del placeholder
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -105,6 +109,7 @@ function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
+            placeholderTextColor="#999"  // Color del placeholder
             secureTextEntry
             value={password}
             onChangeText={setPassword}
@@ -112,6 +117,7 @@ function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Confirmar contraseña"
+            placeholderTextColor="#999"  // Color del placeholder
             secureTextEntry
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -119,14 +125,14 @@ function RegisterScreen({ navigation }) {
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
             <Text style={styles.buttonText}>Registrarse</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.button, styles.loginButton]}
             onPress={() => navigation.navigate('Login')}
           >
             <Text style={styles.buttonText}>Ya tengo una cuenta</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -171,6 +177,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#e8e8e8',
+    color: '#333',  // Color del texto dentro del input
     width: '100%',
     height: 50,
     borderRadius: 25,
@@ -217,7 +224,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 20,
     alignSelf: 'center',
-    width: 100,  // Hace el botón más pequeño
+    width: 100,
   },
   backButtonText: {
     color: 'white',
