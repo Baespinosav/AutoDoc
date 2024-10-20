@@ -10,6 +10,7 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterCarScreen from './src/screens/RegisterCarScreen';
 import VehicleDetailScreen from './src/screens/VehicleDetailScreen';
 import ChatbotScreen from './src/screens/ChatbotScreen';
+import ChatbotSelectionScreen from './src/screens/ChatbotSelectionScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,7 @@ const App = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Chatbot" component={ChatbotScreen} />
+        <Stack.Screen name="ChatbotSelection" component={ChatbotSelectionScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

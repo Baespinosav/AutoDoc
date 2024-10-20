@@ -1,11 +1,47 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, SafeAreaView, ScrollView, Dimensions, Animated } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import Logo from '../assets/Logo.png'; // Asegúrate de que la ruta sea correcta
+
+const { width, height } = Dimensions.get('window');
 
 function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const scaleAnim1 = useRef(new Animated.Value(1)).current;
+  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scaleAnim1, {
+            toValue: 1.05,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim1, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(scaleAnim2, {
+            toValue: 1.1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim2, {
+            toValue: 0.95,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -22,17 +58,42 @@ function LoginScreen({ navigation }) {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      Alert.alert('Error', 'Por favor, ingrese su correo electrónico para recuperar la contraseña');
+      return;
+    }
+
+    try {
+      await auth().sendPasswordResetEmail(email);
+      Alert.alert('Éxito', 'Se ha enviado un correo electrónico para restablecer su contraseña');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', error.message || 'No se pudo enviar el correo de recuperación');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <Animated.View style={[styles.circle1, { transform: [{ scale: scaleAnim1 }] }]} />
+      <Animated.View style={[styles.circle2, { transform: [{ scale: scaleAnim2 }] }]} />
       <View style={styles.header}>
-        <Text style={styles.title}>AutoDoc</Text>
         <Image source={Logo} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.title}>
+          <Text style={styles.boldText}>Auto</Text>Doc
+        </Text>
+      </View>
+      <View style={styles.sloganContainer}>
+        <Text style={styles.slogan}>Tus papeles y mecánico</Text>
+        <Text style={styles.sloganHighlight}>en un solo lugar</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
+          <Text style={styles.loginMessage}>Inicia sesión en tu cuenta</Text>
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
+            placeholderTextColor="#7f8c8d"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -41,18 +102,22 @@ function LoginScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
+            placeholderTextColor="#7f8c8d"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.button, styles.registerButton]}
+            style={styles.registerButton}
             onPress={() => navigation.navigate('Register')}
           >
-            <Text style={styles.buttonText}>¿No tienes una cuenta? Regístrate</Text>
+            <Text style={styles.registerButtonText}>¿No tienes una cuenta? Regístrate</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.forgotPasswordButton} onPress={handleForgotPassword}>
+            <Text style={styles.forgotPasswordButtonText}>¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -69,71 +134,139 @@ function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ffffff',
+  },
+  circle1: {
+    position: 'absolute',
+    width: width * 1.5,
+    height: width * 1.5,
+    borderRadius: width * 0.75,
+    backgroundColor: '#e8f4fd',
+    top: -width * 0.9,  // Movido más arriba
+    left: -width * 0.25,
+    zIndex: 1,
+  },
+  circle2: {
+    position: 'absolute',
+    width: width * 1.3,
+    height: width * 1.3,
+    borderRadius: width * 0.65,
+    backgroundColor: '#d1e8fa',
+    top: -width * 0.8,  // Movido más arriba
+    left: -width * 0.15,
+    zIndex: 2,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    backgroundColor: '#34495e',
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: 'white',
+    justifyContent: 'center',
+    paddingTop: height * 0.08,  // Aumentado ligeramente para compensar los círculos más altos
+    zIndex: 3,
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 28,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  sloganContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+    zIndex: 3,
+  },
+  slogan: {
+    fontSize: 16,
+    color: '#666',
+  },
+  sloganHighlight: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3498db',
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    zIndex: 3,
   },
   formContainer: {
     width: '100%',
   },
+  loginMessage: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
   input: {
-    backgroundColor: '#e8e8e8',
+    backgroundColor: '#ffffff',
     width: '100%',
     height: 50,
-    borderRadius: 25,
+    borderRadius: 8,
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
+    color: '#000',
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
-  button: {
-    backgroundColor: '#2c3e50',
-    padding: 15,
-    borderRadius: 25,
+  loginButton: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#000000',
   },
-  registerButton: {
-    backgroundColor: '#34495e',
-  },
-  buttonText: {
-    color: 'white',
+  loginButtonText: {
+    color: '#000000',
     fontSize: 18,
     fontWeight: 'bold',
   },
+  registerButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  registerButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   backButton: {
-    backgroundColor: 'red',
+    backgroundColor: '#000000',
     padding: 10,
-    borderRadius: 20,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
     marginHorizontal: 20,
-    alignSelf: 'center',
-    width: 100,  // Hace el botón más pequeño
+    marginBottom: 20,
+    zIndex: 3,
   },
   backButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  forgotPasswordButton: {
+    alignItems: 'center',
+  },
+  forgotPasswordButtonText: {
+    color: '#3498db',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

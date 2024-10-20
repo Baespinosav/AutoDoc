@@ -26,7 +26,6 @@ function ReadyUseScreen({ navigation }) {
         setVehicles(vehicleList);
       });
 
-    // Unsubscribe from events when no longer in use
     return () => subscriber();
   }, []);
 
@@ -38,8 +37,9 @@ function ReadyUseScreen({ navigation }) {
       <Image source={SubaruImage} style={styles.vehicleImage} />
       <View style={styles.vehicleInfo}>
         <Text style={styles.vehicleText}>{item.marca} {item.modelo}</Text>
+        <Text style={styles.patenteText}>{item.patente}</Text>
         <Text style={styles.vehicleText}>
-          {item.año && item.año.toDate ? item.año.toDate().getFullYear() : 'Año no disponible'}
+          {item.año ? item.año : 'Año no disponible'}
         </Text>
       </View>
     </TouchableOpacity>
@@ -48,22 +48,27 @@ function ReadyUseScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>AutoDoc</Text>
-        <View style={styles.headerRight}>
-          <TouchableOpacity 
-            style={styles.profileButton}
-            onPress={() => navigation.navigate('Profile')}
-          >
-            <Text style={styles.profileButtonText}>Ver Perfil</Text>
-          </TouchableOpacity>
+        <View style={styles.logoContainer}>
           <Image source={Logo} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.title}>
+            <Text style={styles.boldText}>Auto</Text>Doc
+          </Text>
         </View>
+        <TouchableOpacity 
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('Profile')}
+        >
+          <Text style={styles.profileButtonText}>Ver Perfil</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         data={vehicles}
         renderItem={renderVehicleItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={
+          <Text style={styles.emptyListText}>No tienes vehículos registrados</Text>
+        }
       />
       <TouchableOpacity 
         style={styles.addButton}
@@ -78,49 +83,62 @@ function ReadyUseScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#f0f0f0', // Un color de fondo suave
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    backgroundColor: '#34495e',
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  headerRight: {
+  logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 24,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
   profileButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#000000',
     padding: 10,
     borderRadius: 20,
-    marginRight: 10,
   },
   profileButtonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
   },
-  logo: {
-    width: 50,
-    height: 50,
-  },
   listContainer: {
     padding: 20,
   },
   vehicleItem: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#000000',
   },
   vehicleImage: {
-    width: 80,
+    width: 120,
     height: 80,
     marginRight: 15,
+    resizeMode: 'cover',
+    borderRadius: 5,
   },
   vehicleInfo: {
     flex: 1,
@@ -128,9 +146,15 @@ const styles = StyleSheet.create({
   vehicleText: {
     fontSize: 16,
     color: '#2c3e50',
+    marginBottom: 5,
+  },
+  patenteText: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    marginBottom: 5,
   },
   addButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#000000',
     padding: 15,
     borderRadius: 25,
     margin: 20,
@@ -141,25 +165,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  backButton: {
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 20,
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginBottom: 20,
-    alignSelf: 'center',
-    width: 100,
-  },
-  backButtonText: {
-    color: 'white',
+  emptyListText: {
+    textAlign: 'center',
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: 'white',
+    color: '#7f8c8d',
+    marginTop: 20,
   },
 });
 

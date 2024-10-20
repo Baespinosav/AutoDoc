@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, SafeAreaView, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, SafeAreaView, ScrollView, Dimensions, Animated } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import Logo from '../assets/Logo.png'; // Asegúrate de que la ruta sea correcta
+import Logo from '../assets/Logo.png';
+
+const { width, height } = Dimensions.get('window');
 
 function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -11,6 +13,40 @@ function RegisterScreen({ navigation }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
+
+  const scaleAnim1 = useRef(new Animated.Value(1)).current;
+  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scaleAnim1, {
+            toValue: 1.03,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim1, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(scaleAnim2, {
+            toValue: 1.05,
+            duration: 2500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim2, {
+            toValue: 0.97,
+            duration: 2500,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
+  }, []);
 
   const validateInputs = () => {
     if (!email || !password || !confirmPassword || !firstName || !lastName || !username) {
@@ -37,17 +73,14 @@ function RegisterScreen({ navigation }) {
     if (!validateInputs()) return;
 
     try {
-      // Verificar si el nombre de usuario ya existe
       const usernameExists = await checkUsernameExists(username);
       if (usernameExists) {
         Alert.alert('Error', 'El nombre de usuario ya está en uso');
         return;
       }
 
-      // Crear usuario con email y contraseña
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       
-      // Almacenar información adicional en Firestore
       await firestore().collection('users').doc(userCredential.user.uid).set({
         firstName,
         lastName,
@@ -55,13 +88,12 @@ function RegisterScreen({ navigation }) {
         email,
       });
 
-      // Reservar el nombre de usuario
       await firestore().collection('usernames').doc(username).set({
         uid: userCredential.user.uid
       });
 
       Alert.alert('Éxito', 'Cuenta creada exitosamente');
-      navigation.navigate('ReadyUse'); // Navega a ReadyUse después del registro exitoso
+      navigation.navigate('ReadyUse');
     } catch (error) {
       console.error(error);
       Alert.alert('Error', error.message || 'No se pudo crear la cuenta');
@@ -70,33 +102,46 @@ function RegisterScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Animated.View style={[styles.circle1, { transform: [{ scale: scaleAnim1 }] }]} />
+      <Animated.View style={[styles.circle2, { transform: [{ scale: scaleAnim2 }] }]} />
       <View style={styles.header}>
-        <Text style={styles.title}>AutoDoc</Text>
         <Image source={Logo} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.title}>
+          <Text style={styles.boldText}>Auto</Text>Doc
+        </Text>
+      </View>
+      <View style={styles.sloganContainer}>
+        <Text style={styles.slogan}>Tus papeles y mecánico</Text>
+        <Text style={styles.sloganHighlight}>en un solo lugar</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
+          <Text style={styles.registerMessage}>Crea tu cuenta</Text>
           <TextInput
             style={styles.input}
             placeholder="Nombre"
+            placeholderTextColor="#7f8c8d"
             value={firstName}
             onChangeText={setFirstName}
           />
           <TextInput
             style={styles.input}
             placeholder="Apellido"
+            placeholderTextColor="#7f8c8d"
             value={lastName}
             onChangeText={setLastName}
           />
           <TextInput
             style={styles.input}
             placeholder="Nombre de usuario"
+            placeholderTextColor="#7f8c8d"
             value={username}
             onChangeText={setUsername}
           />
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
+            placeholderTextColor="#7f8c8d"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -105,34 +150,36 @@ function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
-            secureTextEntry
+            placeholderTextColor="#7f8c8d"
             value={password}
             onChangeText={setPassword}
+            secureTextEntry
           />
           <TextInput
             style={styles.input}
             placeholder="Confirmar contraseña"
-            secureTextEntry
+            placeholderTextColor="#7f8c8d"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
+            secureTextEntry
           />
-          <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Registrarse</Text>
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+            <Text style={styles.registerButtonText}>Registrarse</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.button, styles.loginButton]}
+            style={styles.loginButton}
             onPress={() => navigation.navigate('Login')}
           >
-            <Text style={styles.buttonText}>Ya tengo una cuenta</Text>
+            <Text style={styles.loginButtonText}>¿Ya tienes una cuenta? Inicia sesión</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>Volver</Text>
-        </TouchableOpacity>
       </ScrollView>
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.backButtonText}>Volver</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -140,84 +187,127 @@ function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ffffff',
+  },
+  circle1: {
+    position: 'absolute',
+    width: width * 1.2,
+    height: width * 1.2,
+    borderRadius: width * 0.6,
+    backgroundColor: '#e8f4fd',
+    top: -width * 0.7,
+    left: -width * 0.1,
+    zIndex: 1,
+  },
+  circle2: {
+    position: 'absolute',
+    width: width * 1.0,
+    height: width * 1.0,
+    borderRadius: width * 0.5,
+    backgroundColor: '#d1e8fa',
+    top: -width * 0.6,
+    left: -width * 0.05,
+    zIndex: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: height * 0.06,
+    zIndex: 3,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 28,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  sloganContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+    zIndex: 3,
+  },
+  slogan: {
+    fontSize: 16,
+    color: '#666',
+  },
+  sloganHighlight: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3498db',
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
-    letterSpacing: 2,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: {width: -1, height: 1},
-    textShadowRadius: 10
-  },
-  logo: {
-    width: 150,
-    height: 150,
+    paddingTop: 40,
+    zIndex: 3,
   },
   formContainer: {
     width: '100%',
   },
+  registerMessage: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
   input: {
-    backgroundColor: '#e8e8e8',
+    backgroundColor: '#ffffff',
     width: '100%',
     height: 50,
-    borderRadius: 25,
+    borderRadius: 8,
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
+    color: '#000',
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
-  button: {
-    backgroundColor: '#2c3e50',
-    padding: 15,
-    borderRadius: 25,
+  registerButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  loginButton: {
-    backgroundColor: '#34495e',
-  },
-  buttonText: {
-    color: 'white',
+  registerButtonText: {
+    color: '#ffffff',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  header: {
-    flexDirection: 'row',
+  loginButton: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    backgroundColor: '#34495e',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#000000',
   },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  logo: {
-    width: 50,
-    height: 50,
+  loginButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
   },
   backButton: {
-    backgroundColor: 'red',
+    backgroundColor: '#000000',
     padding: 10,
-    borderRadius: 20,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
     marginHorizontal: 20,
-    alignSelf: 'center',
-    width: 100,  // Hace el botón más pequeño
+    marginBottom: 20,
+    zIndex: 3,
   },
   backButtonText: {
     color: 'white',

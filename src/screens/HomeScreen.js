@@ -1,34 +1,73 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, SafeAreaView } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions, Animated } from 'react-native';
 import Logo from '../assets/Logo.png';
 
 const { width, height } = Dimensions.get('window');
 
 function HomeScreen({ navigation }) {
+  const scaleAnim1 = useRef(new Animated.Value(1)).current;
+  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scaleAnim1, {
+            toValue: 1.05,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim1, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(scaleAnim2, {
+            toValue: 1.1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim2, {
+            toValue: 0.95,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>AutoDoc</Text>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <Animated.View style={[styles.circle1, { transform: [{ scale: scaleAnim1 }] }]} />
+      <Animated.View style={[styles.circle2, { transform: [{ scale: scaleAnim2 }] }]} />
+      <View style={styles.header}>
+        <Image source={Logo} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.title}>
+          <Text style={styles.boldText}>Auto</Text>Doc
+        </Text>
       </View>
-      <View style={styles.logoContainer}>
-        <Image
-          source={Logo}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+      <View style={styles.content}>
+        <View style={styles.sloganContainer}>
+          <Text style={styles.sloganPart1}>Tus papeles y mecánico</Text>
+          <Text style={styles.sloganPart2}>en un solo lugar</Text>
+        </View>
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, styles.loginButton]}
+          style={styles.loginButton}
           onPress={() => navigation.navigate('Login')}
         >
-          <Text style={styles.buttonText}>Iniciar Sesión</Text>
+          <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, styles.registerButton]}
+          style={styles.registerButton}
           onPress={() => navigation.navigate('Register')}
         >
-          <Text style={styles.buttonText}>Registrarse</Text>
+          <Text style={styles.registerButtonText}>Registrarse</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -38,61 +77,100 @@ function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ffffff',
   },
-  titleContainer: {
+  circle1: {
+    position: 'absolute',
+    width: width * 1.9,
+    height: width * 1.9,
+    borderRadius: width * 0.95,
+    backgroundColor: '#e8f4fd',
+    top: -width * 0.95,
+    right: -width * 0.45,
+    zIndex: 1,
+  },
+  circle2: {
+    position: 'absolute',
+    width: width * 1.5,
+    height: width * 1.5,
+    borderRadius: width * 0.75,
+    backgroundColor: '#d1e8fa',
+    top: -width * 0.65,
+    right: -width * 0.25,
+    zIndex: 2,
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 40,
-  },
-  title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#333',
-    fontFamily: 'System',  // Cambia esto si tienes una fuente futurista instalada
-    letterSpacing: 2,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: {width: -1, height: 1},
-    textShadowRadius: 10
-  },
-  logoContainer: {
-    height: height * 0.5,
-    width: width,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: height * 0.15,
+    zIndex: 2,
   },
   logo: {
-    width: '80%',
-    height: '80%',
+    width: 40,
+    height: 40,
+    marginRight: 10,
   },
-  buttonContainer: {
+  title: {
+    fontSize: 28,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    zIndex: 2,
   },
-  button: {
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    marginVertical: 10,
-    width: '100%',
+  sloganContainer: {
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+  },
+  sloganPart1: {
+    fontSize: 22,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  sloganPart2: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#3498db',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    zIndex: 2,
   },
   loginButton: {
-    backgroundColor: '#2c3e50',  // Color más oscuro para el botón de inicio de sesión
+    backgroundColor: '#ffffff',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  loginButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
   },
   registerButton: {
-    backgroundColor: '#34495e',  // Color más oscuro para el botón de registro
+    backgroundColor: '#000000',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+  registerButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

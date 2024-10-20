@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, SafeAreaView, Dimensions, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Alert, SafeAreaView, Dimensions, TouchableOpacity, Image, ScrollView } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import Pdf from 'react-native-pdf';
-import { Platform } from 'react-native';
 import RNBlobUtil from 'react-native-blob-util';
 import SubaruImage from '../assets/subaru.png';
 import Logo from '../assets/Logo.png';
@@ -60,39 +59,52 @@ const VehicleDetailScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       {!showPdf ? (
-        <>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>AutoDoc</Text>
-            <Image source={Logo} style={styles.logo} resizeMode="contain" />
+            <View style={styles.logoContainer}>
+              <Image source={Logo} style={styles.logo} resizeMode="contain" />
+              <Text style={styles.headerTitle}>
+                <Text style={styles.boldText}>Auto</Text>Doc
+              </Text>
+            </View>
           </View>
           <View style={styles.content}>
-            <View style={styles.imageContainer}>
-              <Image source={SubaruImage} style={styles.image} resizeMode="contain" />
+            <View style={styles.imageWrapper}>
+              <TouchableOpacity style={styles.deleteButton} onPress={deleteVehicle}>
+                <Text style={styles.deleteButtonText}>Eliminar</Text>
+              </TouchableOpacity>
+              <View style={styles.imageContainer}>
+                <Image source={SubaruImage} style={styles.image} resizeMode="contain" />
+              </View>
             </View>
             <Text style={styles.title}>{vehicle.marca} {vehicle.modelo}</Text>
-            <Text style={styles.detail}>Año: {vehicle.año instanceof Date ? vehicle.año.getFullYear() : new Date(vehicle.año.seconds * 1000).getFullYear()}</Text>
+            <Text style={styles.patenteText}>{vehicle.patente}</Text>
+            <Text style={styles.detail}>Año: {vehicle.año}</Text>
             
-            <TouchableOpacity style={styles.button} onPress={() => downloadAndOpenPdf('permisoCirculacion')}>
-              <Text style={styles.buttonText}>Ver Permiso de Circulación</Text>
+            <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('permisoCirculacion')}>
+              <Text style={styles.viewButtonText}>Ver Permiso de Circulación</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => downloadAndOpenPdf('soap')}>
-              <Text style={styles.buttonText}>Ver SOAP</Text>
+            <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('soap')}>
+              <Text style={styles.viewButtonText}>Ver SOAP</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => downloadAndOpenPdf('revisionTecnica')}>
-              <Text style={styles.buttonText}>Ver Revisión Técnica</Text>
+            <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('revisionTecnica')}>
+              <Text style={styles.viewButtonText}>Ver Revisión Técnica</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.deleteButton} onPress={deleteVehicle}>
-              <Text style={styles.buttonText}>Eliminar Vehículo</Text>
+            <TouchableOpacity 
+              style={styles.chatbotButton} 
+              onPress={() => navigation.navigate('ChatbotSelection', { vehicle: vehicle })}
+            >
+              <Text style={styles.chatbotButtonText}>CHATBOT</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Text style={styles.buttonText}>Volver</Text>
+              <Text style={styles.backButtonText}>Volver</Text>
             </TouchableOpacity>
           </View>
-        </>
+        </ScrollView>
       ) : (
         <View style={styles.pdfContainer}>
           <Pdf
@@ -125,27 +137,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
+  scrollContainer: {
+    flexGrow: 1,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#34495e',
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
+    color: '#333',
   },
-  logo: {
-    width: 50,
-    height: 50,
+  boldText: {
+    fontWeight: 'bold',
   },
   content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    alignItems: 'center',
+  },
+  imageWrapper: {
+    width: '100%',
+    position: 'relative',
+    marginBottom: 20,
+    marginTop: 45, // Aumentamos ligeramente el margen superior
   },
   imageContainer: {
     width: '100%',
@@ -153,7 +181,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     overflow: 'hidden',
-    marginBottom: 20,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -168,7 +195,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#2c3e50',
-    marginBottom: 10,
+    marginBottom: 5,
+  },
+  patenteText: {
+    fontSize: 18,
+    color: '#7f8c8d',
+    marginBottom: 5,
   },
   detail: {
     fontSize: 18,
@@ -178,30 +210,71 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#3498db',
     padding: 15,
-    borderRadius: 25,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
     width: '100%',
   },
-  deleteButton: {
-    backgroundColor: '#e74c3c',
+  chatbotButton: {
+    backgroundColor: '#001f3f', // Azul muy oscuro, casi negro
     padding: 15,
-    borderRadius: 25,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
     width: '100%',
   },
-  backButton: {
-    backgroundColor: '#95a5a6',
+  chatbotButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: -45, // Ajustamos la posición un poco más arriba
+    right: 0,
+    backgroundColor: '#ff0000',
+    padding: 10,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    color: '#ffffff', // Texto blanco para contrastar con el fondo rojo
+    fontWeight: 'bold',
+  },
+  viewButton: {
+    backgroundColor: '#ffffff',
     padding: 15,
-    borderRadius: 25,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  viewButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  backButton: {
+    backgroundColor: '#000000',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
     width: '100%',
+  },
+  backButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   buttonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   pdfContainer: {

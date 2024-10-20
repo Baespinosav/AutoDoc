@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, ScrollView, Image, Animated } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Logo from '../assets/Logo.png';
 
 function ProfileScreen({ navigation }) {
   const [user, setUser] = useState(null);
+  const scaleAnim1 = useRef(new Animated.Value(1)).current;
+  const scaleAnim2 = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -19,6 +21,20 @@ function ProfileScreen({ navigation }) {
     };
 
     fetchUserData();
+
+    // Animación de los círculos
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scaleAnim1, { toValue: 1.1, duration: 2000, useNativeDriver: true }),
+          Animated.timing(scaleAnim1, { toValue: 1, duration: 2000, useNativeDriver: true })
+        ]),
+        Animated.sequence([
+          Animated.timing(scaleAnim2, { toValue: 1.15, duration: 2500, useNativeDriver: true }),
+          Animated.timing(scaleAnim2, { toValue: 1, duration: 2500, useNativeDriver: true })
+        ])
+      ])
+    ).start();
   }, []);
 
   const handleLogout = async () => {
@@ -45,24 +61,32 @@ function ProfileScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Animated.View style={[styles.circle1, { transform: [{ scale: scaleAnim1 }] }]} />
+      <Animated.View style={[styles.circle2, { transform: [{ scale: scaleAnim2 }] }]} />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>AutoDoc</Text>
-        <Image source={Logo} style={styles.logo} resizeMode="contain" />
+        <View style={styles.logoContainer}>
+          <Image source={Logo} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.headerTitle}>
+            <Text style={styles.boldText}>Auto</Text>Doc
+          </Text>
+        </View>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Perfil de Usuario</Text>
-        <View style={styles.infoContainer}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Nombre:</Text>
-            <Text style={styles.infoText}>{user.firstName} {user.lastName}</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Email:</Text>
-            <Text style={styles.infoText}>{user.email}</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Nombre de usuario:</Text>
-            <Text style={styles.infoText}>{user.username}</Text>
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>Perfil de Usuario</Text>
+          <View style={styles.infoContainer}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Nombre:</Text>
+              <Text style={styles.infoText}>{user.firstName} {user.lastName}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Email:</Text>
+              <Text style={styles.infoText}>{user.email}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Nombre de usuario:</Text>
+              <Text style={styles.infoText}>{user.username}</Text>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -86,24 +110,52 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
+  circle1: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+    top: -50,
+    left: -50,
+  },
+  circle2: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+    top: -30,
+    right: -30,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#34495e',
+    backgroundColor: 'transparent',
   },
-  headerTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: 'white',
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  headerTitle: {
+    fontSize: 24,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
   },
   scrollContainer: {
     flexGrow: 1,
+    justifyContent: 'center',
+  },
+  contentContainer: {
     padding: 20,
   },
   title: {
@@ -142,14 +194,14 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: '#e74c3c',
     padding: 15,
-    borderRadius: 25,
+    borderRadius: 8,
     alignItems: 'center',
     marginBottom: 10,
   },
   backButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#000000',
     padding: 15,
-    borderRadius: 25,
+    borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
