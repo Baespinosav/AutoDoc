@@ -4,33 +4,39 @@ import Logo from '../assets/Logo.png';
 
 const { width, height } = Dimensions.get('window');
 
+/**
+ * Componente HomeScreen que muestra la pantalla de inicio de la aplicación.
+ * Permite al usuario iniciar sesión o registrarse.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 function HomeScreen({ navigation }) {
-  const scaleAnim1 = useRef(new Animated.Value(1)).current;
-  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
+  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
 
   useEffect(() => {
+    // Inicia las animaciones de escalado en bucle
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
           Animated.timing(scaleAnim1, {
-            toValue: 1.05,
+            toValue: 1.05, // Escala hacia arriba
             duration: 2000,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim1, {
-            toValue: 1,
+            toValue: 1, // Regresa a la escala original
             duration: 2000,
             useNativeDriver: true,
           }),
         ]),
         Animated.sequence([
           Animated.timing(scaleAnim2, {
-            toValue: 1.1,
+            toValue: 1.1, // Escala hacia arriba
             duration: 1500,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim2, {
-            toValue: 0.95,
+            toValue: 0.95, // Regresa a una escala más pequeña
             duration: 1500,
             useNativeDriver: true,
           }),
@@ -59,13 +65,13 @@ function HomeScreen({ navigation }) {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate('Login')} // Navega a la pantalla de inicio de sesión
         >
           <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.registerButton}
-          onPress={() => navigation.navigate('Register')}
+          onPress={() => navigation.navigate('Register')} // Navega a la pantalla de registro
         >
           <Text style={styles.registerButtonText}>Registrarse</Text>
         </TouchableOpacity>

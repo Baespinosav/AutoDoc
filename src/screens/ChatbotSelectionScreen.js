@@ -4,12 +4,21 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { useFocusEffect } from '@react-navigation/native';
 
+/**
+ * Componente ChatbotSelectionScreen que permite al usuario seleccionar o iniciar conversaciones con el chatbot.
+ * @param {Object} route - Las propiedades de la ruta, incluyendo el vehículo.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 const ChatbotSelectionScreen = ({ route, navigation }) => {
-  const { vehicle } = route.params;
-  const [conversations, setConversations] = useState([]);
+  const { vehicle } = route.params; // Obtiene el vehículo de los parámetros de la ruta
+  const [conversations, setConversations] = useState([]); // Estado para almacenar las conversaciones
 
+  /**
+   * Carga las conversaciones del usuario desde Firestore.
+   * Filtra las conversaciones por el ID del usuario y el ID del vehículo.
+   */
   const loadConversations = () => {
-    const userId = auth().currentUser.uid;
+    const userId = auth().currentUser.uid; // Obtiene el ID del usuario actual
     return firestore()
       .collection('chatbotConversations')
       .where('userId', '==', userId)
@@ -21,31 +30,43 @@ const ChatbotSelectionScreen = ({ route, navigation }) => {
             id: doc.id,
             ...doc.data(),
           }));
-          setConversations(conversationList);
+          setConversations(conversationList); // Actualiza el estado con la lista de conversaciones
         } else {
           console.log('No se encontraron conversaciones');
-          setConversations([]);
+          setConversations([]); // Si no hay conversaciones, establece el estado como vacío
         }
       }, error => {
-        console.error("Error al obtener conversaciones:", error);
+        console.error("Error al obtener conversaciones:", error); // Manejo de errores
       });
   };
 
+  // Carga las conversaciones cuando la pantalla está enfocada
   useFocusEffect(
     React.useCallback(() => {
-      const unsubscribe = loadConversations();
-      return () => unsubscribe();
+      const unsubscribe = loadConversations(); // Llama a la función para cargar conversaciones
+      return () => unsubscribe(); // Limpia el listener al salir de la pantalla
     }, [vehicle.id])
   );
 
+  /**
+   * Navega a la pantalla de Chatbot para iniciar una nueva conversación.
+   */
   const startNewConversation = () => {
-    navigation.navigate('Chatbot', { vehicle, conversationId: null });
+    navigation.navigate('Chatbot', { vehicle, conversationId: null }); // Navega a la pantalla de Chatbot
   };
 
+  /**
+   * Navega a la pantalla de Chatbot para abrir una conversación existente.
+   * @param {string} conversationId - El ID de la conversación a abrir.
+   */
   const openExistingConversation = (conversationId) => {
-    navigation.navigate('Chatbot', { vehicle, conversationId });
+    navigation.navigate('Chatbot', { vehicle, conversationId }); // Navega a la pantalla de Chatbot con el ID de la conversación
   };
 
+  /**
+   * Elimina una conversación de Firestore.
+   * @param {string} conversationId - El ID de la conversación a eliminar.
+   */
   const deleteConversation = (conversationId) => {
     Alert.alert(
       "Eliminar conversación",
@@ -57,12 +78,12 @@ const ChatbotSelectionScreen = ({ route, navigation }) => {
           style: "destructive",
           onPress: async () => {
             try {
-              await firestore().collection('chatbotConversations').doc(conversationId).delete();
+              await firestore().collection('chatbotConversations').doc(conversationId).delete(); // Elimina la conversación de Firestore
               console.log('Conversación eliminada');
               // No es necesario recargar manualmente, el listener se encargará de actualizar la lista
             } catch (error) {
               console.error('Error al eliminar la conversación:', error);
-              Alert.alert('Error', 'No se pudo eliminar la conversación');
+              Alert.alert('Error', 'No se pudo eliminar la conversación'); // Manejo de errores
             }
           }
         }
@@ -70,11 +91,16 @@ const ChatbotSelectionScreen = ({ route, navigation }) => {
     );
   };
 
+  /**
+   * Renderiza un elemento de conversación en la lista.
+   * @param {Object} item - El objeto de conversación a renderizar.
+   * @returns {JSX.Element} El componente de conversación.
+   */
   const renderConversationItem = ({ item }) => (
     <View style={styles.conversationItem}>
       <TouchableOpacity
         style={styles.conversationButton}
-        onPress={() => openExistingConversation(item.id)}
+        onPress={() => openExistingConversation(item.id)} // Abre la conversación existente
       >
         <Text style={styles.conversationTitle}>
           Conversación del {item.createdAt ? item.createdAt.toDate().toLocaleString() : 'Fecha desconocida'}
@@ -82,7 +108,7 @@ const ChatbotSelectionScreen = ({ route, navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => deleteConversation(item.id)}
+        onPress={() => deleteConversation(item.id)} // Elimina la conversación
       >
         <Text style={styles.deleteButtonText}>Eliminar</Text>
       </TouchableOpacity>
@@ -99,7 +125,7 @@ const ChatbotSelectionScreen = ({ route, navigation }) => {
         data={conversations}
         renderItem={renderConversationItem}
         keyExtractor={item => item.id}
-        ListEmptyComponent={<Text style={styles.emptyText}>No hay conversaciones previas</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>No hay conversaciones previas</Text>} // Mensaje si no hay conversaciones
       />
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>Volver</Text>

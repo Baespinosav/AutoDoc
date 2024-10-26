@@ -5,41 +5,52 @@ import firestore from '@react-native-firebase/firestore';
 import Logo from '../assets/Logo.png';
 import SubaruImage from '../assets/subaru.png';
 
+/**
+ * Componente ReadyUseScreen que muestra la lista de vehículos del usuario.
+ * Permite al usuario ver detalles de cada vehículo y agregar nuevos vehículos.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 function ReadyUseScreen({ navigation }) {
-  const [vehicles, setVehicles] = useState([]);
+  const [vehicles, setVehicles] = useState([]); // Estado para almacenar la lista de vehículos
 
   useEffect(() => {
-    const user = auth().currentUser;
-    if (!user) return;
+    const user = auth().currentUser; // Obtiene el usuario actual
+    if (!user) return; // Si no hay usuario, no hace nada
 
+    // Suscripción a la colección de vehículos en Firestore
     const subscriber = firestore()
       .collection('vehicles')
-      .where('userId', '==', user.uid)
+      .where('userId', '==', user.uid) // Filtra vehículos por ID de usuario
       .onSnapshot(querySnapshot => {
         const vehicleList = [];
         querySnapshot.forEach(documentSnapshot => {
           vehicleList.push({
             ...documentSnapshot.data(),
-            id: documentSnapshot.id,
+            id: documentSnapshot.id, // Agrega el ID del documento a la lista
           });
         });
-        setVehicles(vehicleList);
+        setVehicles(vehicleList); // Actualiza el estado con la lista de vehículos
       });
 
-    return () => subscriber();
+    return () => subscriber(); // Limpia la suscripción al desmontar el componente
   }, []);
 
+  /**
+   * Renderiza un elemento de vehículo en la lista.
+   * @param {Object} item - El objeto de vehículo a renderizar.
+   * @returns {JSX.Element} El componente de vehículo.
+   */
   const renderVehicleItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.vehicleItem}
-      onPress={() => navigation.navigate('VehicleDetail', { vehicle: item })}
+      onPress={() => navigation.navigate('VehicleDetail', { vehicle: item })} // Navega a la pantalla de detalles del vehículo
     >
       <Image source={SubaruImage} style={styles.vehicleImage} />
       <View style={styles.vehicleInfo}>
         <Text style={styles.vehicleText}>{item.marca} {item.modelo}</Text>
         <Text style={styles.patenteText}>{item.patente}</Text>
         <Text style={styles.vehicleText}>
-          {item.año ? item.año : 'Año no disponible'}
+          {item.año ? item.año : 'Año no disponible'} // Muestra el año o un mensaje si no está disponible
         </Text>
       </View>
     </TouchableOpacity>
@@ -56,23 +67,23 @@ function ReadyUseScreen({ navigation }) {
         </View>
         <TouchableOpacity 
           style={styles.profileButton}
-          onPress={() => navigation.navigate('Profile')}
+          onPress={() => navigation.navigate('Profile')} // Navega a la pantalla de perfil
         >
           <Text style={styles.profileButtonText}>Ver Perfil</Text>
         </TouchableOpacity>
       </View>
       <FlatList
-        data={vehicles}
-        renderItem={renderVehicleItem}
-        keyExtractor={item => item.id}
+        data={vehicles} // Lista de vehículos
+        renderItem={renderVehicleItem} // Función para renderizar cada vehículo
+        keyExtractor={item => item.id} // Clave única para cada elemento
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
-          <Text style={styles.emptyListText}>No tienes vehículos registrados</Text>
+          <Text style={styles.emptyListText}>No tienes vehículos registrados</Text> // Mensaje si no hay vehículos
         }
       />
       <TouchableOpacity 
         style={styles.addButton}
-        onPress={() => navigation.navigate('RegisterCar')}
+        onPress={() => navigation.navigate('RegisterCar')} // Navega a la pantalla para agregar un vehículo
       >
         <Text style={styles.addButtonText}>Agregar Vehículo</Text>
       </TouchableOpacity>

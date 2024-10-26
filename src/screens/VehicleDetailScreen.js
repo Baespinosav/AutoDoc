@@ -7,32 +7,45 @@ import RNBlobUtil from 'react-native-blob-util';
 import SubaruImage from '../assets/subaru.png';
 import Logo from '../assets/Logo.png';
 
+/**
+ * Componente VehicleDetailScreen que muestra los detalles de un vehículo.
+ * Permite al usuario ver documentos asociados y eliminar el vehículo.
+ * @param {Object} route - Propiedades de la ruta, incluyendo el vehículo.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 const VehicleDetailScreen = ({ route, navigation }) => {
-  const { vehicle } = route.params;
+  const { vehicle } = route.params; // Obtiene el vehículo de los parámetros de la ruta
 
-  const [showPdf, setShowPdf] = useState(false);
-  const [localPdfPath, setLocalPdfPath] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [showPdf, setShowPdf] = useState(false); // Estado para controlar la visualización del PDF
+  const [localPdfPath, setLocalPdfPath] = useState(null); // Estado para almacenar la ruta local del PDF
+  const [currentPage, setCurrentPage] = useState(1); // Estado para almacenar la página actual del PDF
 
+  /**
+   * Descarga y abre un documento PDF asociado al vehículo.
+   * @param {string} documentType - Tipo de documento a descargar (permisoCirculacion, soap, revisionTecnica).
+   */
   const downloadAndOpenPdf = async (documentType) => {
-    const pdfUrl = vehicle[documentType];
+    const pdfUrl = vehicle[documentType]; // Obtiene la URL del PDF
     if (pdfUrl) {
       try {
         const { path } = await RNBlobUtil.config({
           fileCache: true,
           appendExt: 'pdf'
-        }).fetch('GET', pdfUrl);
-        setLocalPdfPath(path);
-        setShowPdf(true);
+        }).fetch('GET', pdfUrl); // Descarga el PDF
+        setLocalPdfPath(path); // Establece la ruta local del PDF
+        setShowPdf(true); // Muestra el PDF
       } catch (error) {
         console.error('Error al descargar el PDF:', error);
-        Alert.alert('Error', 'No se pudo descargar el PDF');
+        Alert.alert('Error', 'No se pudo descargar el PDF'); // Manejo de errores
       }
     } else {
-      Alert.alert('Información', 'No hay documento PDF asociado a este vehículo');
+      Alert.alert('Información', 'No hay documento PDF asociado a este vehículo'); // Mensaje si no hay PDF
     }
   };
 
+  /**
+   * Elimina el vehículo de Firestore y sus documentos asociados de Firebase Storage.
+   */
   const deleteVehicle = async () => {
     Alert.alert(
       "Eliminar Vehículo",
@@ -41,15 +54,16 @@ const VehicleDetailScreen = ({ route, navigation }) => {
         { text: "Cancelar", style: "cancel" },
         { text: "Eliminar", style: "destructive", onPress: async () => {
           try {
-            await firestore().collection('vehicles').doc(vehicle.id).delete();
+            await firestore().collection('vehicles').doc(vehicle.id).delete(); // Elimina el documento del vehículo
+            // Elimina los documentos asociados de Firebase Storage
             if (vehicle.permisoCirculacion) await storage().refFromURL(vehicle.permisoCirculacion).delete();
             if (vehicle.soap) await storage().refFromURL(vehicle.soap).delete();
             if (vehicle.revisionTecnica) await storage().refFromURL(vehicle.revisionTecnica).delete();
             Alert.alert("Éxito", "Vehículo eliminado correctamente");
-            navigation.goBack();
+            navigation.goBack(); // Regresa a la pantalla anterior
           } catch (error) {
             console.error('Error al eliminar el vehículo:', error);
-            Alert.alert("Error", "No se pudo eliminar el vehículo");
+            Alert.alert("Error", "No se pudo eliminar el vehículo"); // Manejo de errores
           }
         }}
       ]
@@ -108,18 +122,18 @@ const VehicleDetailScreen = ({ route, navigation }) => {
       ) : (
         <View style={styles.pdfContainer}>
           <Pdf
-            source={{ uri: `file://${localPdfPath}` }}
+            source={{ uri: `file://${localPdfPath}` }} // Carga el PDF desde la ruta local
             style={styles.pdf}
             onLoadComplete={(numberOfPages,filePath) => {
               console.log(`Número de páginas: ${numberOfPages}`);
             }}
             onPageChanged={(page,numberOfPages) => {
               console.log(`Página actual: ${page}`);
-              setCurrentPage(page);
+              setCurrentPage(page); // Actualiza la página actual
             }}
             onError={(error) => {
               console.log('Error al cargar PDF:', error);
-              Alert.alert('Error', 'No se pudo cargar el PDF');
+              Alert.alert('Error', 'No se pudo cargar el PDF'); // Manejo de errores
             }}
           />
           <TouchableOpacity style={styles.closeButton} onPress={() => setShowPdf(false)}>

@@ -4,23 +4,29 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Logo from '../assets/Logo.png';
 
+/**
+ * Componente ProfileScreen que muestra la información del perfil del usuario.
+ * Permite al usuario cerrar sesión y volver a la pantalla anterior.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 function ProfileScreen({ navigation }) {
-  const [user, setUser] = useState(null);
-  const scaleAnim1 = useRef(new Animated.Value(1)).current;
-  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+  const [user, setUser] = useState(null); // Estado para almacenar la información del usuario
+  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
+  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
 
   useEffect(() => {
+    // Función para obtener los datos del usuario desde Firestore
     const fetchUserData = async () => {
-      const currentUser = auth().currentUser;
+      const currentUser = auth().currentUser; // Obtiene el usuario actual
       if (currentUser) {
-        const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
+        const userDoc = await firestore().collection('users').doc(currentUser.uid).get(); // Obtiene el documento del usuario
         if (userDoc.exists) {
-          setUser(userDoc.data());
+          setUser(userDoc.data()); // Establece el estado con los datos del usuario
         }
       }
     };
 
-    fetchUserData();
+    fetchUserData(); // Llama a la función para obtener los datos del usuario
 
     // Animación de los círculos
     Animated.loop(
@@ -34,23 +40,28 @@ function ProfileScreen({ navigation }) {
           Animated.timing(scaleAnim2, { toValue: 1, duration: 2500, useNativeDriver: true })
         ])
       ])
-    ).start();
+    ).start(); // Inicia la animación
   }, []);
 
+  /**
+   * Maneja el cierre de sesión del usuario.
+   * Cierra la sesión y navega a la pantalla de inicio.
+   */
   const handleLogout = async () => {
     try {
-      await auth().signOut();
-      Alert.alert('Éxito', 'Sesión cerrada correctamente');
+      await auth().signOut(); // Cierra la sesión del usuario
+      Alert.alert('Éxito', 'Sesión cerrada correctamente'); // Mensaje de éxito
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Home' }],
+        routes: [{ name: 'Home' }], // Navega a la pantalla de inicio
       });
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
-      Alert.alert('Error', 'No se pudo cerrar la sesión');
+      Alert.alert('Error', 'No se pudo cerrar la sesión'); // Manejo de errores
     }
   };
 
+  // Si los datos del usuario aún no se han cargado, muestra un mensaje de carga
   if (!user) {
     return (
       <View style={styles.container}>
@@ -96,7 +107,7 @@ function ProfileScreen({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.goBack()} // Navega a la pantalla anterior
         >
           <Text style={styles.backButtonText}>Volver</Text>
         </TouchableOpacity>

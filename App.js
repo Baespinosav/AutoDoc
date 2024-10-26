@@ -12,8 +12,13 @@ import VehicleDetailScreen from './src/screens/VehicleDetailScreen';
 import ChatbotScreen from './src/screens/ChatbotScreen';
 import ChatbotSelectionScreen from './src/screens/ChatbotSelectionScreen';
 
+// Crea un stack navigator
 const Stack = createStackNavigator();
 
+/**
+ * Componente principal de la aplicación que configura la navegación.
+ * @returns {JSX.Element} Componente de la aplicación.
+ */
 const App = () => {
   return (
     <NavigationContainer>

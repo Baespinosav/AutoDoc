@@ -11,22 +11,28 @@ import { Platform } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 import RNFS from 'react-native-fs';
 
+/**
+ * Componente RegisterCar que permite al usuario registrar un nuevo vehículo.
+ * Permite seleccionar documentos necesarios y subirlos a Firebase.
+ * @returns {JSX.Element} Componente de registro de vehículo.
+ */
 const RegisterCar = () => {
   const navigation = useNavigation();
-  const [marca, setMarca] = useState('Subaru');
-  const [modelo, setModelo] = useState('Impreza');
-  const [año, setAño] = useState(new Date().getFullYear());
-  const [patente, setPatente] = useState('');
+  const [marca, setMarca] = useState('Subaru'); // Estado para almacenar la marca del vehículo
+  const [modelo, setModelo] = useState('Impreza'); // Estado para almacenar el modelo del vehículo
+  const [año, setAño] = useState(new Date().getFullYear()); // Estado para almacenar el año del vehículo
+  const [patente, setPatente] = useState(''); // Estado para almacenar la patente del vehículo
   const [documents, setDocuments] = useState({
     permisoCirculacion: null,
     soap: null,
     revisionTecnica: null
-  });
+  }); // Estado para almacenar los documentos del vehículo
 
-  const scaleAnim1 = useRef(new Animated.Value(1)).current;
-  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
+  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
 
   useEffect(() => {
+    // Inicia las animaciones de escalado en bucle
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
@@ -57,9 +63,13 @@ const RegisterCar = () => {
     ).start();
   }, []);
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({length: currentYear - 1899}, (_, i) => currentYear - i);
+  const currentYear = new Date().getFullYear(); // Obtiene el año actual
+  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i); // Crea un array de años desde 1900 hasta el año actual
 
+  /**
+   * Permite al usuario seleccionar un documento desde su dispositivo.
+   * @param {string} documentType - Tipo de documento a seleccionar (permisoCirculacion, soap, revisionTecnica).
+   */
   const pickDocument = async (documentType) => {
     try {
       const result = await DocumentPicker.pick({
@@ -82,6 +92,11 @@ const RegisterCar = () => {
     }
   };
 
+  /**
+   * Sube un documento PDF a Firebase Storage.
+   * @param {string} documentType - Tipo de documento a subir.
+   * @returns {Promise<string|null>} URL del documento subido o null si no hay documento.
+   */
   const uploadPdf = async (documentType) => {
     const doc = documents[documentType];
     if (!doc) {
@@ -153,6 +168,10 @@ const RegisterCar = () => {
     }
   };
 
+  /**
+   * Registra un nuevo vehículo en Firestore.
+   * Valida los campos y sube los documentos necesarios.
+   */
   const registerCar = async () => {
     try {
       if (!marca || !modelo || !año || !patente) {

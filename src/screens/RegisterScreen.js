@@ -6,18 +6,23 @@ import Logo from '../assets/Logo.png';
 
 const { width, height } = Dimensions.get('window');
 
+/**
+ * Componente RegisterScreen que permite a los usuarios registrarse en la aplicación.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 function RegisterScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Estado para almacenar el correo electrónico
+  const [password, setPassword] = useState(''); // Estado para almacenar la contraseña
+  const [confirmPassword, setConfirmPassword] = useState(''); // Estado para confirmar la contraseña
+  const [firstName, setFirstName] = useState(''); // Estado para almacenar el nombre
+  const [lastName, setLastName] = useState(''); // Estado para almacenar el apellido
+  const [username, setUsername] = useState(''); // Estado para almacenar el nombre de usuario
 
-  const scaleAnim1 = useRef(new Animated.Value(1)).current;
-  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
+  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
 
   useEffect(() => {
+    // Inicia las animaciones de escalado en bucle
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
@@ -48,6 +53,10 @@ function RegisterScreen({ navigation }) {
     ).start();
   }, []);
 
+  /**
+   * Valida los campos de entrada del formulario de registro.
+   * @returns {boolean} Verdadero si todos los campos son válidos, falso en caso contrario.
+   */
   const validateInputs = () => {
     if (!email || !password || !confirmPassword || !firstName || !lastName || !username) {
       Alert.alert('Error', 'Por favor, complete todos los campos');
@@ -64,11 +73,20 @@ function RegisterScreen({ navigation }) {
     return true;
   };
 
+  /**
+   * Verifica si el nombre de usuario ya existe en Firestore.
+   * @param {string} username - El nombre de usuario a verificar.
+   * @returns {Promise<boolean>} Verdadero si el nombre de usuario existe, falso en caso contrario.
+   */
   const checkUsernameExists = async (username) => {
     const usernameDoc = await firestore().collection('usernames').doc(username).get();
     return usernameDoc.exists;
   };
 
+  /**
+   * Maneja el registro del usuario.
+   * Valida los campos, verifica la existencia del nombre de usuario y crea la cuenta en Firebase.
+   */
   const handleRegister = async () => {
     if (!validateInputs()) return;
 
@@ -93,10 +111,10 @@ function RegisterScreen({ navigation }) {
       });
 
       Alert.alert('Éxito', 'Cuenta creada exitosamente');
-      navigation.navigate('ReadyUse');
+      navigation.navigate('ReadyUse'); // Navega a la pantalla principal
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', error.message || 'No se pudo crear la cuenta');
+      Alert.alert('Error', error.message || 'No se pudo crear la cuenta'); // Manejo de errores
     }
   };
 

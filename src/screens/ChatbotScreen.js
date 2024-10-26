@@ -12,6 +12,11 @@ LogBox.ignoreAllLogs(); // Ignora todos los warnings
 const API_KEY = 'AIzaSyBtBsTj7u59Sv2kyDRFwF_BRVWfV_UDyeU';
 const genAI = new GoogleGenerativeAI(API_KEY);
 
+/**
+ * Componente ChatbotScreen que maneja la interacción del usuario con el chatbot.
+ * @param {Object} route - Las propiedades de la ruta, incluyendo el vehículo y el ID de la conversación.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 function ChatbotScreen({ route, navigation }) {
   const { vehicle, conversationId } = route.params;
   const [messages, setMessages] = useState([]);
@@ -33,6 +38,10 @@ function ChatbotScreen({ route, navigation }) {
     };
   }, []);
 
+  /**
+   * Carga una conversación existente desde Firestore.
+   * Si la conversación existe, se actualiza el estado de los mensajes.
+   */
   const loadExistingConversation = async () => {
     const conversationRef = firestore().collection('chatbotConversations').doc(currentConversationId);
     const conversationDoc = await conversationRef.get();
@@ -41,6 +50,10 @@ function ChatbotScreen({ route, navigation }) {
     }
   };
 
+  /**
+   * Crea una nueva conversación en Firestore.
+   * Se inicializa con el ID del usuario y el ID del vehículo.
+   */
   const createNewConversation = async () => {
     const userId = auth().currentUser.uid;
     const newConversationRef = await firestore().collection('chatbotConversations').add({
@@ -53,10 +66,18 @@ function ChatbotScreen({ route, navigation }) {
     sendInitialMessage();
   };
 
+  /**
+   * Reproduce un mensaje utilizando Text-to-Speech (TTS).
+   * @param {string} message - El mensaje que se va a reproducir.
+   */
   const speakMessage = (message) => {
     Tts.speak(message);
   };
 
+  /**
+   * Envía un mensaje inicial al chatbot.
+   * Se genera un mensaje de saludo utilizando el modelo de IA.
+   */
   const sendInitialMessage = async () => {
     const prompt = `Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${vehicle.año}. Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico.`;
 
@@ -74,6 +95,10 @@ function ChatbotScreen({ route, navigation }) {
     }
   };
 
+  /**
+   * Envía un mensaje del usuario al chatbot.
+   * Genera una respuesta del chatbot utilizando el modelo de IA.
+   */
   const sendMessage = async () => {
     if (inputText.trim() === '') return;
 
@@ -98,12 +123,21 @@ function ChatbotScreen({ route, navigation }) {
     }
   };
 
+  /**
+   * Actualiza la conversación en Firestore con los mensajes actualizados.
+   * @param {Array} updatedMessages - La lista de mensajes actualizados.
+   */
   const updateFirestoreConversation = async (updatedMessages) => {
     await firestore().collection('chatbotConversations').doc(currentConversationId).update({
       messages: updatedMessages,
     });
   };
 
+  /**
+   * Renderiza un mensaje en la interfaz de usuario.
+   * @param {Object} item - El mensaje a renderizar.
+   * @returns {JSX.Element} El componente de mensaje.
+   */
   const renderMessage = ({ item }) => (
     <View style={[styles.messageBubble, item.isUser ? styles.userMessage : styles.botMessage]}>
       <Text style={styles.messageText}>{item.text}</Text>

@@ -5,36 +5,41 @@ import Logo from '../assets/Logo.png'; // Asegúrate de que la ruta sea correcta
 
 const { width, height } = Dimensions.get('window');
 
+/**
+ * Componente LoginScreen que permite a los usuarios iniciar sesión en la aplicación.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
 function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(''); // Estado para almacenar el correo electrónico
+  const [password, setPassword] = useState(''); // Estado para almacenar la contraseña
 
-  const scaleAnim1 = useRef(new Animated.Value(1)).current;
-  const scaleAnim2 = useRef(new Animated.Value(1)).current;
+  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
+  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
 
   useEffect(() => {
+    // Inicia las animaciones de escalado en bucle
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
           Animated.timing(scaleAnim1, {
-            toValue: 1.05,
+            toValue: 1.05, // Escala hacia arriba
             duration: 2000,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim1, {
-            toValue: 1,
+            toValue: 1, // Regresa a la escala original
             duration: 2000,
             useNativeDriver: true,
           }),
         ]),
         Animated.sequence([
           Animated.timing(scaleAnim2, {
-            toValue: 1.1,
+            toValue: 1.1, // Escala hacia arriba
             duration: 1500,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim2, {
-            toValue: 0.95,
+            toValue: 0.95, // Regresa a una escala más pequeña
             duration: 1500,
             useNativeDriver: true,
           }),
@@ -43,33 +48,41 @@ function LoginScreen({ navigation }) {
     ).start();
   }, []);
 
+  /**
+   * Maneja el inicio de sesión del usuario.
+   * Valida el correo electrónico y la contraseña, y realiza la autenticación.
+   */
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor, ingrese email y contraseña');
+      Alert.alert('Error', 'Por favor, ingrese email y contraseña'); // Mensaje de error si faltan campos
       return;
     }
 
     try {
-      await auth().signInWithEmailAndPassword(email, password);
-      navigation.navigate('ReadyUse');
+      await auth().signInWithEmailAndPassword(email, password); // Intenta iniciar sesión
+      navigation.navigate('ReadyUse'); // Navega a la pantalla principal si el inicio de sesión es exitoso
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', error.message || 'No se pudo iniciar sesión');
+      Alert.alert('Error', error.message || 'No se pudo iniciar sesión'); // Manejo de errores
     }
   };
 
+  /**
+   * Maneja la solicitud de restablecimiento de contraseña.
+   * Envía un correo electrónico para restablecer la contraseña si el correo electrónico es válido.
+   */
   const handleForgotPassword = async () => {
     if (!email) {
-      Alert.alert('Error', 'Por favor, ingrese su correo electrónico para recuperar la contraseña');
+      Alert.alert('Error', 'Por favor, ingrese su correo electrónico para recuperar la contraseña'); // Mensaje de error si falta el correo
       return;
     }
 
     try {
-      await auth().sendPasswordResetEmail(email);
-      Alert.alert('Éxito', 'Se ha enviado un correo electrónico para restablecer su contraseña');
+      await auth().sendPasswordResetEmail(email); // Envía el correo de restablecimiento
+      Alert.alert('Éxito', 'Se ha enviado un correo electrónico para restablecer su contraseña'); // Mensaje de éxito
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', error.message || 'No se pudo enviar el correo de recuperación');
+      Alert.alert('Error', error.message || 'No se pudo enviar el correo de recuperación'); // Manejo de errores
     }
   };
 
@@ -95,7 +108,7 @@ function LoginScreen({ navigation }) {
             placeholder="Correo electrónico"
             placeholderTextColor="#7f8c8d"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={setEmail} // Actualiza el estado del correo electrónico
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -104,7 +117,7 @@ function LoginScreen({ navigation }) {
             placeholder="Contraseña"
             placeholderTextColor="#7f8c8d"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={setPassword} // Actualiza el estado de la contraseña
             secureTextEntry
           />
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
@@ -112,7 +125,7 @@ function LoginScreen({ navigation }) {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.registerButton}
-            onPress={() => navigation.navigate('Register')}
+            onPress={() => navigation.navigate('Register')} // Navega a la pantalla de registro
           >
             <Text style={styles.registerButtonText}>¿No tienes una cuenta? Regístrate</Text>
           </TouchableOpacity>
@@ -123,7 +136,7 @@ function LoginScreen({ navigation }) {
       </ScrollView>
       <TouchableOpacity 
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation.goBack()} // Navega a la pantalla anterior
       >
         <Text style={styles.backButtonText}>Volver</Text>
       </TouchableOpacity>
