@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, SafeAreaView, ScrollView, Image, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, SafeAreaView, ScrollView, Image, Animated, Modal, ProgressBarAndroid } from 'react-native'; // Importa ProgressBarAndroid
 import { Picker } from '@react-native-picker/picker';
 import DocumentPicker from 'react-native-document-picker';
 import storage from '@react-native-firebase/storage';
@@ -18,21 +18,22 @@ import RNFS from 'react-native-fs';
  */
 const RegisterCar = () => {
   const navigation = useNavigation();
-  const [marca, setMarca] = useState('Subaru'); // Estado para almacenar la marca del vehículo
-  const [modelo, setModelo] = useState('Impreza'); // Estado para almacenar el modelo del vehículo
-  const [año, setAño] = useState(new Date().getFullYear()); // Estado para almacenar el año del vehículo
-  const [patente, setPatente] = useState(''); // Estado para almacenar la patente del vehículo
+  const [marca, setMarca] = useState('Subaru');
+  const [modelo, setModelo] = useState('Impreza');
+  const [año, setAño] = useState(new Date().getFullYear());
+  const [patente, setPatente] = useState('');
   const [documents, setDocuments] = useState({
     permisoCirculacion: null,
     soap: null,
     revisionTecnica: null
-  }); // Estado para almacenar los documentos del vehículo
+  });
+  const [uploadProgress, setUploadProgress] = useState(0); // Estado para el progreso de la subida
+  const [isUploading, setIsUploading] = useState(false); // Estado para controlar la visibilidad del modal
 
-  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
-  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
+  const scaleAnim1 = useRef(new Animated.Value(1)).current;
+  const scaleAnim2 = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Inicia las animaciones de escalado en bucle
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
@@ -63,13 +64,9 @@ const RegisterCar = () => {
     ).start();
   }, []);
 
-  const currentYear = new Date().getFullYear(); // Obtiene el año actual
-  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i); // Crea un array de años desde 1900 hasta el año actual
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
 
-  /**
-   * Permite al usuario seleccionar un documento desde su dispositivo.
-   * @param {string} documentType - Tipo de documento a seleccionar (permisoCirculacion, soap, revisionTecnica).
-   */
   const pickDocument = async (documentType) => {
     try {
       const result = await DocumentPicker.pick({
@@ -92,11 +89,6 @@ const RegisterCar = () => {
     }
   };
 
-  /**
-   * Sube un documento PDF a Firebase Storage.
-   * @param {string} documentType - Tipo de documento a subir.
-   * @returns {Promise<string|null>} URL del documento subido o null si no hay documento.
-   */
   const uploadPdf = async (documentType) => {
     const doc = documents[documentType];
     if (!doc) {
@@ -107,49 +99,37 @@ const RegisterCar = () => {
       console.log(`Iniciando subida de ${documentType}...`);
       const timestamp = Date.now();
       const storagePath = `vehicle_documents/${auth().currentUser.uid}/${timestamp}_${doc.name}`;
-      console.log('Ruta de almacenamiento:', storagePath);
-
       const reference = storage().ref(storagePath);
-      console.log('Referencia creada:', reference.fullPath);
 
-      console.log('Preparando archivo para subir...');
-      console.log('URI del archivo:', doc.uri);
-
-      // Convertir content:// URI a file:// URI en Android
       let fileUri = doc.uri;
       if (Platform.OS === 'android' && doc.uri.startsWith('content://')) {
         const destPath = `${RNFS.CachesDirectoryPath}/${doc.name}`;
         await RNFS.copyFile(doc.uri, destPath);
         fileUri = `file://${destPath}`;
       }
-      console.log('File URI:', fileUri);
 
-      // Leer el archivo como una cadena base64
       const base64Data = await RNFS.readFile(fileUri, 'base64');
-      console.log('Archivo leído como base64');
 
-      // Subir el archivo
+      setIsUploading(true); // Muestra el modal de carga
+      setUploadProgress(0); // Reinicia el progreso
+
       const uploadTask = reference.putString(base64Data, 'base64', { contentType: 'application/pdf' });
 
       return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          uploadTask.cancel();
-          reject(new Error('Timeout: La subida tardó demasiado'));
-        }, 60000); // 60 segundos de timeout
-
         uploadTask.on(
           storage.TaskEvent.STATE_CHANGED,
           (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             console.log(`Progreso de subida ${documentType}: ${progress.toFixed(2)}%`);
+            setUploadProgress(progress); // Actualiza el progreso
           },
           (error) => {
-            clearTimeout(timeout);
             console.error('Error durante la subida:', error);
+            setIsUploading(false); // Oculta el modal de carga
             reject(error);
           },
           async () => {
-            clearTimeout(timeout);
+            setIsUploading(false); // Oculta el modal de carga
             console.log('Subida completada');
             try {
               const url = await reference.getDownloadURL();
@@ -168,10 +148,6 @@ const RegisterCar = () => {
     }
   };
 
-  /**
-   * Registra un nuevo vehículo en Firestore.
-   * Valida los campos y sube los documentos necesarios.
-   */
   const registerCar = async () => {
     try {
       if (!marca || !modelo || !año || !patente) {
@@ -293,6 +269,21 @@ const RegisterCar = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Modal de carga */}
+      <Modal
+        transparent={true}
+        visible={isUploading}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Subiendo documentos...</Text>
+            <ProgressBarAndroid styleAttr="Horizontal" indeterminate={false} progress={uploadProgress / 100} />
+            <Text style={styles.progressText}>{uploadProgress.toFixed(2)}%</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -421,6 +412,28 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semi-transparente
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  progressText: {
+    marginTop: 10,
+    fontSize: 16,
   },
 });
 
