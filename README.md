@@ -58,9 +58,6 @@ Para ejecutar la aplicación, sigue estos pasos:
 
 Si todo está configurado correctamente, deberías ver tu nueva aplicación en ejecución en tu emulador de Android o simulador de iOS.
 
-## Contribuciones
-
-Si deseas contribuir a la aplicación, no dudes en hacer un fork del repositorio y enviar un pull request.
 
 ## Contacto
 
@@ -69,3 +66,10 @@ Para más información, puedes contactar al desarrollador o consultar la documen
 ---
 
 ¡Gracias por usar nuestra aplicación! Esperamos que te ayude a gestionar tus documentos vehiculares de manera eficiente.
+
+
+## Docs
+Documentación de las screens de la aplicación
+```
+https://autodoc-nine.vercel.app/index.html
+```
