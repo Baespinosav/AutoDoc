@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/screens/ReadyuseScreen.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/screens/ReadyuseScreen.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, SafeAreaView } from 'react-native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import Logo from '../assets/Logo.png';
+import SubaruImage from '../assets/subaru.png';
+
+/**
+ * Componente ReadyUseScreen que muestra la lista de vehículos del usuario.
+ * Permite al usuario ver detalles de cada vehículo y agregar nuevos vehículos.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
+function ReadyUseScreen({ navigation }) {
+  const [vehicles, setVehicles] = useState([]); // Estado para almacenar la lista de vehículos
+
+  useEffect(() => {
+    const user = auth().currentUser; // Obtiene el usuario actual
+    if (!user) return; // Si no hay usuario, no hace nada
+
+    // Suscripción a la colección de vehículos en Firestore
+    const subscriber = firestore()
+      .collection('vehicles')
+      .where('userId', '==', user.uid) // Filtra vehículos por ID de usuario
+      .onSnapshot(querySnapshot => {
+        const vehicleList = [];
+        querySnapshot.forEach(documentSnapshot => {
+          vehicleList.push({
+            ...documentSnapshot.data(),
+            id: documentSnapshot.id, // Agrega el ID del documento a la lista
+          });
+        });
+        setVehicles(vehicleList); // Actualiza el estado con la lista de vehículos
+      });
+
+    return () => subscriber(); // Limpia la suscripción al desmontar el componente
+  }, []);
+
+  /**
+   * Renderiza un elemento de vehículo en la lista.
+   * @param {Object} item - El objeto de vehículo a renderizar.
+   * @returns {JSX.Element} El componente de vehículo.
+   */
+  const renderVehicleItem = ({ item }) => (
+    &lt;TouchableOpacity 
+      style={styles.vehicleItem}
+      onPress={() => navigation.navigate('VehicleDetail', { vehicle: item })} // Navega a la pantalla de detalles del vehículo
+    >
+      &lt;Image source={SubaruImage} style={styles.vehicleImage} />
+      &lt;View style={styles.vehicleInfo}>
+        &lt;Text style={styles.vehicleText}>{item.marca} {item.modelo}&lt;/Text>
+        &lt;Text style={styles.patenteText}>{item.patente}&lt;/Text>
+        &lt;Text style={styles.vehicleText}>
+          {item.año ? item.año : 'Año no disponible'} // Muestra el año o un mensaje si no está disponible
+        &lt;/Text>
+      &lt;/View>
+    &lt;/TouchableOpacity>
+  );
+
+  return (
+    &lt;SafeAreaView style={styles.container}>
+      &lt;View style={styles.header}>
+        &lt;View style={styles.logoContainer}>
+          &lt;Image source={Logo} style={styles.logo} resizeMode="contain" />
+          &lt;Text style={styles.title}>
+            &lt;Text style={styles.boldText}>Auto&lt;/Text>Doc
+          &lt;/Text>
+        &lt;/View>
+        &lt;TouchableOpacity 
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('Profile')} // Navega a la pantalla de perfil
+        >
+          &lt;Text style={styles.profileButtonText}>Ver Perfil&lt;/Text>
+        &lt;/TouchableOpacity>
+      &lt;/View>
+      &lt;FlatList
+        data={vehicles} // Lista de vehículos
+        renderItem={renderVehicleItem} // Función para renderizar cada vehículo
+        keyExtractor={item => item.id} // Clave única para cada elemento
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={
+          &lt;Text style={styles.emptyListText}>No tienes vehículos registrados&lt;/Text> // Mensaje si no hay vehículos
+        }
+      />
+      &lt;TouchableOpacity 
+        style={styles.addButton}
+        onPress={() => navigation.navigate('RegisterCar')} // Navega a la pantalla para agregar un vehículo
+      >
+        &lt;Text style={styles.addButtonText}>Agregar Vehículo&lt;/Text>
+      &lt;/TouchableOpacity>
+    &lt;/SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f0f0f0', // Un color de fondo suave
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 24,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  profileButton: {
+    backgroundColor: '#000000',
+    padding: 10,
+    borderRadius: 20,
+  },
+  profileButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  listContainer: {
+    padding: 20,
+  },
+  vehicleItem: {
+    flexDirection: 'row',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  vehicleImage: {
+    width: 120,
+    height: 80,
+    marginRight: 15,
+    resizeMode: 'cover',
+    borderRadius: 5,
+  },
+  vehicleInfo: {
+    flex: 1,
+  },
+  vehicleText: {
+    fontSize: 16,
+    color: '#2c3e50',
+    marginBottom: 5,
+  },
+  patenteText: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    marginBottom: 5,
+  },
+  addButton: {
+    backgroundColor: '#000000',
+    padding: 15,
+    borderRadius: 25,
+    margin: 20,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  emptyListText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#7f8c8d',
+    marginTop: 20,
+  },
+});
+
+export default ReadyUseScreen;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#ChatbotScreen">ChatbotScreen</a></li><li><a href="global.html#ChatbotSelectionScreen">ChatbotSelectionScreen</a></li><li><a href="global.html#HomeScreen">HomeScreen</a></li><li><a href="global.html#LoginScreen">LoginScreen</a></li><li><a href="global.html#ProfileScreen">ProfileScreen</a></li><li><a href="global.html#ReadyUseScreen">ReadyUseScreen</a></li><li><a href="global.html#RegisterCar">RegisterCar</a></li><li><a href="global.html#RegisterScreen">RegisterScreen</a></li><li><a href="global.html#VehicleDetailScreen">VehicleDetailScreen</a></li><li><a href="global.html#ViewPdfScreen">ViewPdfScreen</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Oct 26 2024 19:05:49 GMT-0300 (hora de verano de Chile)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

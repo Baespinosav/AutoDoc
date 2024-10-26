@@ -1,0 +1,13 @@
+{
+    "source": {
+      "include": ["src/screens", "App.js"],
+      "excludePattern": "(node_modules|\\.git)"
+    },
+    "opts": {
+      "destination": "./docs", 
+      "recurse": true
+    },
+    "plugins": [
+      "plugins/markdown"
+    ]
+}
