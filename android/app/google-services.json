@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "89023610002",
+    "project_id": "autodoc-1",
+    "storage_bucket": "autodoc-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89023610002:android:3f10a9e09218399353ba4b",
+        "android_client_info": {
+          "package_name": "com.grupo1.autodoc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_yut6RdufwI2m73Q7EZciDK4PwrpXRF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
