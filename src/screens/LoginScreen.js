@@ -60,7 +60,7 @@ function LoginScreen({ navigation }) {
 
     try {
       await auth().signInWithEmailAndPassword(email, password); // Intenta iniciar sesión
-<<<<<<< HEAD
+
 
       // Verificar si es el administrador
       if (email === 'admin@admin.cl') {
@@ -68,9 +68,9 @@ function LoginScreen({ navigation }) {
       } else {
         navigation.navigate('ReadyUse'); // Navega a la pantalla principal si el inicio de sesión es exitoso
       }
-=======
+
       navigation.navigate('ReadyUse'); // Navega a la pantalla principal si el inicio de sesión es exitoso
->>>>>>> 574ae0de7bf09b25b7f67b4d13647a1912f89e20
+
     } catch (error) {
       console.error(error);
       Alert.alert('Error', error.message || 'No se pudo iniciar sesión'); // Manejo de errores
