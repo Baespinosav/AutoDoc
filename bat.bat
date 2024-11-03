@@ -25,4 +25,8 @@ npm install react-native-tts
 npm install react-native-vector-icons
 npx react-native link react-native-tts
 npm install react-native-fs
+
+npm install react-native-html-to-pdf
+
+
 npm install

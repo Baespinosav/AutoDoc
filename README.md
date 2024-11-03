@@ -35,6 +35,7 @@ npm install react-native-pdf
 npm install react-native-blob-util
 npm install react-native-vector-icons
 npm install react-native-fs
+npm install react-native-html-to-pdf
 ```
 
 ## Ejecución de la Aplicación
