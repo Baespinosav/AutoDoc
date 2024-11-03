@@ -12,10 +12,6 @@ import VehicleDetailScreen from './src/screens/VehicleDetailScreen';
 import ChatbotScreen from './src/screens/ChatbotScreen';
 import ChatbotSelectionScreen from './src/screens/ChatbotSelectionScreen';
 
-import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
-
-
-
 // Crea un stack navigator
 const Stack = createStackNavigator();
 
@@ -44,14 +40,6 @@ const App = () => {
         />
         <Stack.Screen name="Chatbot" component={ChatbotScreen} />
         <Stack.Screen name="ChatbotSelection" component={ChatbotSelectionScreen} options={{ headerShown: false }}/>
-
-        <Stack.Screen 
-          name="AdminDashboard" 
-          component={AdminDashboardScreen} 
-          options={{ headerShown: false }}
-        />
-
-
       </Stack.Navigator>
     </NavigationContainer>
   );
