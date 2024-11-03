@@ -81,11 +81,7 @@ android {
     defaultConfig {
         applicationId "com.grupo1.autodoc"
         minSdkVersion rootProject.ext.minSdkVersion
-
-        targetSdkVersion 31
-
         targetSdkVersion rootProject.ext.targetSdkVersion
-
         versionCode 1
         versionName "1.0"
         missingDimensionStrategy 'react-native-camera', 'general'
