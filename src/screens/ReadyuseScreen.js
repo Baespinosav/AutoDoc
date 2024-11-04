@@ -50,7 +50,7 @@ function ReadyUseScreen({ navigation }) {
         <Text style={styles.vehicleText}>{item.marca} {item.modelo}</Text>
         <Text style={styles.patenteText}>{item.patente}</Text>
         <Text style={styles.vehicleText}>
-          {item.año ? item.año : 'Año no disponible'} // Muestra el año o un mensaje si no está disponible
+          {item.año ? item.año : 'Año no disponible'}
         </Text>
       </View>
     </TouchableOpacity>

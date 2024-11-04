@@ -69,7 +69,7 @@ function LoginScreen({ navigation }) {
         navigation.navigate('ReadyUse'); // Navega a la pantalla principal si el inicio de sesión es exitoso
       }
 
-      navigation.navigate('ReadyUse'); // Navega a la pantalla principal si el inicio de sesión es exitoso
+       
 
     } catch (error) {
       console.error(error);
