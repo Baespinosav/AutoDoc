@@ -1,45 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, SafeAreaView, ScrollView, Dimensions, Animated } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import Logo from '../assets/Logo.png'; // Asegúrate de que la ruta sea correcta
+import firestore from '@react-native-firebase/firestore'; // Importa Firestore
+import Logo from '../assets/Logo.png';
 
 const { width, height } = Dimensions.get('window');
 
-/**
- * Componente LoginScreen que permite a los usuarios iniciar sesión en la aplicación.
- * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
- */
 function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState(''); // Estado para almacenar el correo electrónico
-  const [password, setPassword] = useState(''); // Estado para almacenar la contraseña
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
-  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
+  const scaleAnim1 = useRef(new Animated.Value(1)).current;
+  const scaleAnim2 = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Inicia las animaciones de escalado en bucle
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
           Animated.timing(scaleAnim1, {
-            toValue: 1.05, // Escala hacia arriba
+            toValue: 1.05,
             duration: 2000,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim1, {
-            toValue: 1, // Regresa a la escala original
+            toValue: 1,
             duration: 2000,
             useNativeDriver: true,
           }),
         ]),
         Animated.sequence([
           Animated.timing(scaleAnim2, {
-            toValue: 1.1, // Escala hacia arriba
+            toValue: 1.1,
             duration: 1500,
             useNativeDriver: true,
           }),
           Animated.timing(scaleAnim2, {
-            toValue: 0.95, // Regresa a una escala más pequeña
+            toValue: 0.95,
             duration: 1500,
             useNativeDriver: true,
           }),
@@ -48,32 +44,35 @@ function LoginScreen({ navigation }) {
     ).start();
   }, []);
 
-  /**
-   * Maneja el inicio de sesión del usuario.
-   * Valida el correo electrónico y la contraseña, y realiza la autenticación.
-   */
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor, ingrese email y contraseña'); // Mensaje de error si faltan campos
+      Alert.alert('Error', 'Por favor, ingrese email y contraseña');
       return;
     }
 
     try {
-      await auth().signInWithEmailAndPassword(email, password); // Intenta iniciar sesión
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      const uid = userCredential.user.uid;
 
+      // Obtener el rol del usuario desde Firestore
+      const userDoc = await firestore().collection('users').doc(uid).get();
 
-      // Verificar si es el administrador
-      if (email === 'admin@admin.cl') {
-        navigation.replace('AdminDashboard');
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+
+        // Verificar el rol
+        if (userData.role === 'admin') {
+          navigation.replace('AdminDashboard');
+        } else {
+          navigation.navigate('ReadyUse');
+        }
       } else {
-        navigation.navigate('ReadyUse'); // Navega a la pantalla principal si el inicio de sesión es exitoso
+        Alert.alert('Error', 'No se encontró el documento del usuario en Firestore.');
       }
-
-       
 
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', error.message || 'No se pudo iniciar sesión'); // Manejo de errores
+      Alert.alert('Error', error.message || 'No se pudo iniciar sesión');
     }
   };
 
