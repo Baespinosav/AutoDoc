@@ -84,6 +84,12 @@ const VehicleDetailScreen = ({ route, navigation }) => {
           </View>
           <View style={styles.content}>
             <View style={styles.imageWrapper}>
+              <TouchableOpacity 
+                style={styles.editButton} 
+                onPress={() => navigation.navigate('EditVehicle', { vehicle })} // Navega a la pantalla de edición
+              >
+                <Text style={styles.editButtonText}>Editar</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.deleteButton} onPress={deleteVehicle}>
                 <Text style={styles.deleteButtonText}>Eliminar</Text>
               </TouchableOpacity>
@@ -256,6 +262,22 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: 14,
     color: '#ffffff', // Texto blanco para contrastar con el fondo rojo
+    fontWeight: 'bold',
+  },
+  editButton: {
+    position: 'absolute',
+    top: -45, // Ajustamos la posición un poco más arriba
+    right: 80, // Ajusta la posición horizontal
+    backgroundColor: '#3498db', // Color azul para el botón de editar
+    padding: 10,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  editButtonText: {
+    fontSize: 14,
+    color: '#ffffff', // Texto blanco para contrastar con el fondo azul
     fontWeight: 'bold',
   },
   viewButton: {
