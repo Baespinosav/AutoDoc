@@ -128,9 +128,5 @@ dependencies {
     // Elimina esta línea si la agregaste:
     // implementation 'com.facebook.react:react-native-gesture-handler:2.9.0'
 }
-<<<<<<< HEAD
 apply plugin: 'com.google.gms.google-services'
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
-=======
-apply plugin: 'com.google.gms.google-services'
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2

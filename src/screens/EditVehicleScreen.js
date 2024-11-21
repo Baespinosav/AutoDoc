@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
-=======
-import React, { useState } from 'react';
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import firestore from '@react-native-firebase/firestore';
@@ -15,7 +11,6 @@ import firestore from '@react-native-firebase/firestore';
 const EditVehicleScreen = ({ route, navigation }) => {
   const { vehicle } = route.params; // Obtiene el vehículo de los parámetros de la ruta
 
-<<<<<<< HEAD
   // Separar la patente existente en sus partes
   const [patente, setPatente] = useState(() => {
     const partes = vehicle.patente.split('-');
@@ -25,16 +20,12 @@ const EditVehicleScreen = ({ route, navigation }) => {
       parte3: partes[2] || ''
     };
   });
-=======
-  const [patente, setPatente] = useState(vehicle.patente);
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
   const [año, setAño] = useState(vehicle.año);
   
   // Obtiene el año actual y genera un array de años desde 1900 hasta el año actual
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
 
-<<<<<<< HEAD
   // Función de validación para cada parte
   const validarPatente = (texto, parte) => {
     const soloLetras = /^[A-Z]*$/;
@@ -53,13 +44,10 @@ const EditVehicleScreen = ({ route, navigation }) => {
     }
   };
 
-=======
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
   /**
    * Maneja la actualización de la información del vehículo.
    */
   const handleUpdate = async () => {
-<<<<<<< HEAD
     // Validar que todas las partes de la patente estén completas
     if (!patente.parte1 || !patente.parte2 || !patente.parte3 || 
         patente.parte1.length !== 2 || patente.parte2.length !== 2 || patente.parte3.length !== 2) {
@@ -87,26 +75,6 @@ const EditVehicleScreen = ({ route, navigation }) => {
       Alert.alert('Error', 'No se pudo actualizar la información del vehículo'); // Manejo de errores
     }
   };
-=======
-  if (!patente || !año) {
-    Alert.alert('Error', 'Por favor, completa todos los campos'); // Mensaje de error si faltan campos
-    return;
-  }
-
-  try {
-    await firestore().collection('vehicles').doc(vehicle.id).update({
-      patente,
-      año,
-    });
-
-    Alert.alert('Éxito', 'Información del vehículo actualizada correctamente');
-    navigation.navigate('ReadyUse'); // Cambia esta línea para redirigir a ReadyUseScreen
-  } catch (error) {
-    console.error('Error al actualizar el vehículo:', error);
-    Alert.alert('Error', 'No se pudo actualizar la información del vehículo'); // Manejo de errores
-  }
-};
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
@@ -117,7 +85,6 @@ const EditVehicleScreen = ({ route, navigation }) => {
         <Text style={styles.readOnlyText}>{vehicle.modelo}</Text>
         
         <Text style={styles.label}>Patente:</Text>
-<<<<<<< HEAD
         <View style={styles.patenteInputContainer}>
           <TextInput
             style={styles.patenteInput}
@@ -163,13 +130,6 @@ const EditVehicleScreen = ({ route, navigation }) => {
             placeholderTextColor="#7f8c8d"
           />
         </View>
-=======
-        <TextInput
-          style={styles.input}
-          value={patente}
-          onChangeText={setPatente}
-        />
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
         
         <Text style={styles.label}>Año:</Text>
         <View style={styles.pickerContainer}>
@@ -261,7 +221,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-<<<<<<< HEAD
   patenteInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -284,8 +243,6 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: 'bold',
   },
-=======
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
 });
 
 export default EditVehicleScreen;

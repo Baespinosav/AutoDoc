@@ -59,11 +59,6 @@ function LoginScreen({ navigation }) {
 
       if (userDoc.exists) {
         const userData = userDoc.data();
-<<<<<<< HEAD
-=======
-
-        // Verificar el rol
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
         if (userData.role === 'admin') {
           navigation.replace('AdminDashboard');
         } else {
@@ -75,7 +70,6 @@ function LoginScreen({ navigation }) {
 
     } catch (error) {
       console.error(error);
-<<<<<<< HEAD
       
       let errorMessage = 'Credenciales incorrectas';
       
@@ -101,9 +95,6 @@ function LoginScreen({ navigation }) {
       }
       
       Alert.alert('Error', errorMessage);
-=======
-      Alert.alert('Error', error.message || 'No se pudo iniciar sesión');
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
     }
   };
 
@@ -113,16 +104,11 @@ function LoginScreen({ navigation }) {
    */
   const handleForgotPassword = async () => {
     if (!email) {
-<<<<<<< HEAD
       Alert.alert('Error', 'Por favor, ingrese su correo electrónico para recuperar la contraseña');
-=======
-      Alert.alert('Error', 'Por favor, ingrese su correo electrónico para recuperar la contraseña'); // Mensaje de error si falta el correo
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
       return;
     }
 
     try {
-<<<<<<< HEAD
       // Primero verificamos si el correo existe en nuestra base de datos
       const usersSnapshot = await firestore()
         .collection('users')
@@ -161,13 +147,6 @@ function LoginScreen({ navigation }) {
       }
       
       Alert.alert('Error', errorMessage);
-=======
-      await auth().sendPasswordResetEmail(email); // Envía el correo de restablecimiento
-      Alert.alert('Éxito', 'Se ha enviado un correo electrónico para restablecer su contraseña'); // Mensaje de éxito
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', error.message || 'No se pudo enviar el correo de recuperación'); // Manejo de errores
->>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
     }
   };
 
