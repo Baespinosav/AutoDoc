@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/screens/HomeScreen.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/screens/HomeScreen.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions, Animated } from 'react-native';
+import Logo from '../assets/Logo.png';
+
+const { width, height } = Dimensions.get('window');
+
+/**
+ * Componente HomeScreen que muestra la pantalla de inicio de la aplicación.
+ * Permite al usuario iniciar sesión o registrarse.
+ * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
+ */
+function HomeScreen({ navigation }) {
+  const scaleAnim1 = useRef(new Animated.Value(1)).current; // Animación para el primer círculo
+  const scaleAnim2 = useRef(new Animated.Value(1)).current; // Animación para el segundo círculo
+
+  useEffect(() => {
+    // Inicia las animaciones de escalado en bucle
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scaleAnim1, {
+            toValue: 1.05, // Escala hacia arriba
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim1, {
+            toValue: 1, // Regresa a la escala original
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(scaleAnim2, {
+            toValue: 1.1, // Escala hacia arriba
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim2, {
+            toValue: 0.95, // Regresa a una escala más pequeña
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    &lt;SafeAreaView style={styles.container}>
+      &lt;StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      &lt;Animated.View style={[styles.circle1, { transform: [{ scale: scaleAnim1 }] }]} />
+      &lt;Animated.View style={[styles.circle2, { transform: [{ scale: scaleAnim2 }] }]} />
+      &lt;View style={styles.header}>
+        &lt;Image source={Logo} style={styles.logo} resizeMode="contain" />
+        &lt;Text style={styles.title}>
+          &lt;Text style={styles.boldText}>Auto&lt;/Text>Doc
+        &lt;/Text>
+      &lt;/View>
+      &lt;View style={styles.content}>
+        &lt;View style={styles.sloganContainer}>
+          &lt;Text style={styles.sloganPart1}>Tus papeles y mecánico&lt;/Text>
+          &lt;Text style={styles.sloganPart2}>en un solo lugar&lt;/Text>
+        &lt;/View>
+      &lt;/View>
+      &lt;View style={styles.buttonContainer}>
+        &lt;TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => navigation.navigate('Login')} // Navega a la pantalla de inicio de sesión
+        >
+          &lt;Text style={styles.loginButtonText}>Iniciar Sesión&lt;/Text>
+        &lt;/TouchableOpacity>
+        &lt;TouchableOpacity
+          style={styles.registerButton}
+          onPress={() => navigation.navigate('Register')} // Navega a la pantalla de registro
+        >
+          &lt;Text style={styles.registerButtonText}>Registrarse&lt;/Text>
+        &lt;/TouchableOpacity>
+      &lt;/View>
+    &lt;/SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  circle1: {
+    position: 'absolute',
+    width: width * 1.9,
+    height: width * 1.9,
+    borderRadius: width * 0.95,
+    backgroundColor: '#e8f4fd',
+    top: -width * 0.95,
+    right: -width * 0.45,
+    zIndex: 1,
+  },
+  circle2: {
+    position: 'absolute',
+    width: width * 1.5,
+    height: width * 1.5,
+    borderRadius: width * 0.75,
+    backgroundColor: '#d1e8fa',
+    top: -width * 0.65,
+    right: -width * 0.25,
+    zIndex: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: height * 0.15,
+    zIndex: 2,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 28,
+    color: '#333',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    zIndex: 2,
+  },
+  sloganContainer: {
+    alignItems: 'center',
+  },
+  sloganPart1: {
+    fontSize: 22,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  sloganPart2: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#3498db',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    zIndex: 2,
+  },
+  loginButton: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  loginButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  registerButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  registerButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
+
+export default HomeScreen;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#ChatbotScreen">ChatbotScreen</a></li><li><a href="global.html#ChatbotSelectionScreen">ChatbotSelectionScreen</a></li><li><a href="global.html#HomeScreen">HomeScreen</a></li><li><a href="global.html#LoginScreen">LoginScreen</a></li><li><a href="global.html#ProfileScreen">ProfileScreen</a></li><li><a href="global.html#ReadyUseScreen">ReadyUseScreen</a></li><li><a href="global.html#RegisterCar">RegisterCar</a></li><li><a href="global.html#RegisterScreen">RegisterScreen</a></li><li><a href="global.html#VehicleDetailScreen">VehicleDetailScreen</a></li><li><a href="global.html#ViewPdfScreen">ViewPdfScreen</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Oct 26 2024 19:05:49 GMT-0300 (hora de verano de Chile)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
