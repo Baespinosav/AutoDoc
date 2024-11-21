@@ -52,6 +52,7 @@ const VehicleDetailScreen = ({ route, navigation }) => {
       "¿Estás seguro de que quieres eliminar este vehículo?",
       [
         { text: "Cancelar", style: "cancel" },
+<<<<<<< HEAD
         {
           text: "Eliminar",
           style: "destructive",
@@ -88,6 +89,22 @@ const VehicleDetailScreen = ({ route, navigation }) => {
             }
           },
         },
+=======
+        { text: "Eliminar", style: "destructive", onPress: async () => {
+          try {
+            await firestore().collection('vehicles').doc(vehicle.id).delete(); // Elimina el documento del vehículo
+            // Elimina los documentos asociados de Firebase Storage
+            if (vehicle.permisoCirculacion) await storage().refFromURL(vehicle.permisoCirculacion).delete();
+            if (vehicle.soap) await storage().refFromURL(vehicle.soap).delete();
+            if (vehicle.revisionTecnica) await storage().refFromURL(vehicle.revisionTecnica).delete();
+            Alert.alert("Éxito", "Vehículo eliminado correctamente");
+            navigation.goBack(); // Regresa a la pantalla anterior
+          } catch (error) {
+            console.error('Error al eliminar el vehículo:', error);
+            Alert.alert("Error", "No se pudo eliminar el vehículo"); // Manejo de errores
+          }
+        }}
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
       ]
     );
   };

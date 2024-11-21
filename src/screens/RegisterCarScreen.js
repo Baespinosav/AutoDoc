@@ -10,8 +10,11 @@ import Logo from '../assets/Logo.png';
 import { Platform } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 import RNFS from 'react-native-fs';
+<<<<<<< HEAD
 import DateTimePicker from '@react-native-community/datetimepicker';
 import NotificationService from '../utils/NotificationService';
+=======
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
 
 /**
  * Componente RegisterCar que permite al usuario registrar un nuevo vehículo.
@@ -23,16 +26,21 @@ const RegisterCar = () => {
   const [marca, setMarca] = useState('Subaru');
   const [modelo, setModelo] = useState('Impreza');
   const [año, setAño] = useState(new Date().getFullYear());
+<<<<<<< HEAD
   const [patente, setPatente] = useState({
     parte1: '',
     parte2: '',
     parte3: ''
   });
+=======
+  const [patente, setPatente] = useState('');
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
   const [documents, setDocuments] = useState({
     permisoCirculacion: null,
     soap: null,
     revisionTecnica: null
   });
+<<<<<<< HEAD
   const [documentDates, setDocumentDates] = useState({
     permisoCirculacion: null,
     soap: null,
@@ -43,6 +51,8 @@ const RegisterCar = () => {
     soap: false,
     revisionTecnica: false
   });
+=======
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
   const [uploadProgress, setUploadProgress] = useState(0); // Estado para el progreso de la subida
   const [isUploading, setIsUploading] = useState(false); // Estado para controlar la visibilidad del modal
 
@@ -80,6 +90,7 @@ const RegisterCar = () => {
     ).start();
   }, []);
 
+<<<<<<< HEAD
   useEffect(() => {
     setupNotifications();
   }, []);
@@ -88,6 +99,8 @@ const RegisterCar = () => {
     await NotificationService.requestPermission();
   };
 
+=======
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
 
@@ -172,6 +185,7 @@ const RegisterCar = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleDateChange = (event, selectedDate, documentType) => {
     setShowDatePicker(prev => ({
       ...prev,
@@ -250,10 +264,20 @@ const RegisterCar = () => {
       }
 
       // Si pasa todas las validaciones, continuar con el registro
+=======
+  const registerCar = async () => {
+    try {
+      if (!marca || !modelo || !año || !patente) {
+        Alert.alert('Error', 'Por favor, complete todos los campos obligatorios');
+        return;
+      }
+
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
       const documentUrls = {};
       const documentTypes = ['permisoCirculacion', 'soap', 'revisionTecnica'];
 
       for (const docType of documentTypes) {
+<<<<<<< HEAD
         try {
           const url = await uploadPdf(docType);
           if (url) {
@@ -265,6 +289,23 @@ const RegisterCar = () => {
           console.error(`Error al subir ${docType}:`, uploadError);
           Alert.alert('Error', `No se pudo subir el documento ${docType}. Por favor, inténtelo de nuevo.`);
           return;
+=======
+        if (documents[docType]) {
+          try {
+            const url = await uploadPdf(docType);
+            if (url) {
+              documentUrls[docType] = url;
+            } else {
+              console.log(`No se pudo obtener la URL para ${docType}`);
+            }
+          } catch (uploadError) {
+            console.error(`Error al subir ${docType}:`, uploadError);
+            Alert.alert('Error', `No se pudo subir el documento ${docType}. Por favor, inténtelo de nuevo.`);
+            return;
+          }
+        } else {
+          console.log(`No se seleccionó documento para ${docType}`);
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
         }
       }
 
@@ -272,6 +313,7 @@ const RegisterCar = () => {
         marca,
         modelo,
         año: parseInt(año, 10),
+<<<<<<< HEAD
         patente: patenteCompleta,
         ...documentUrls,
         documentDates: {
@@ -282,10 +324,17 @@ const RegisterCar = () => {
         userId: auth().currentUser.uid,
         createdAt: firestore.FieldValue.serverTimestamp(),
         notificationsSent: {} // Para rastrear notificaciones enviadas
+=======
+        patente,
+        ...documentUrls,
+        userId: auth().currentUser.uid,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
       });
 
       console.log('Vehículo registrado con ID:', docRef.id);
 
+<<<<<<< HEAD
       // Programar notificaciones para cada documento
       const vehicleInfo = `${marca} ${modelo} (${patenteCompleta})`;
 
@@ -313,6 +362,8 @@ const RegisterCar = () => {
         );
       }
 
+=======
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
       Alert.alert(
         'Éxito',
         'Vehículo registrado correctamente',
@@ -366,6 +417,7 @@ const RegisterCar = () => {
               ))}
             </Picker>
           </View>
+<<<<<<< HEAD
           <View style={styles.patenteContainer}>
             <Text style={styles.patenteLabel}>Patente *</Text>
             <View style={styles.patenteInputContainer}>
@@ -490,6 +542,27 @@ const RegisterCar = () => {
             </>
           )}
           <Text style={styles.requiredFieldsNote}>* Campos obligatorios</Text>
+=======
+          <TextInput
+            style={styles.input}
+            placeholder="Patente"
+            placeholderTextColor="#7f8c8d"
+            value={patente}
+            onChangeText={setPatente}
+          />
+          <TouchableOpacity style={styles.documentButton} onPress={() => pickDocument('permisoCirculacion')}>
+            <Text style={styles.documentButtonText}>Seleccionar Permiso de Circulación</Text>
+          </TouchableOpacity>
+          {documents.permisoCirculacion && <Text style={styles.documentName}>Documento seleccionado: {documents.permisoCirculacion.name}</Text>}
+          <TouchableOpacity style={styles.documentButton} onPress={() => pickDocument('soap')}>
+            <Text style={styles.documentButtonText}>Seleccionar SOAP</Text>
+          </TouchableOpacity>
+          {documents.soap && <Text style={styles.documentName}>Documento seleccionado: {documents.soap.name}</Text>}
+          <TouchableOpacity style={styles.documentButton} onPress={() => pickDocument('revisionTecnica')}>
+            <Text style={styles.documentButtonText}>Seleccionar Revisión Técnica</Text>
+          </TouchableOpacity>
+          {documents.revisionTecnica && <Text style={styles.documentName}>Documento seleccionado: {documents.revisionTecnica.name}</Text>}
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
           <TouchableOpacity style={styles.registerButton} onPress={registerCar}>
             <Text style={styles.registerButtonText}>Registrar Vehículo</Text>
           </TouchableOpacity>
@@ -664,6 +737,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
   },
+<<<<<<< HEAD
   dateButton: {
     backgroundColor: '#f0f0f0',
     padding: 10,
@@ -717,6 +791,8 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: 'bold',
   },
+=======
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
 });
 
 export default RegisterCar;

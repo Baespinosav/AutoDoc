@@ -104,7 +104,10 @@ function RegisterScreen({ navigation }) {
         lastName,
         username,
         email,
+<<<<<<< HEAD
         role: 'user',
+=======
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
       });
 
       await firestore().collection('usernames').doc(username).set({

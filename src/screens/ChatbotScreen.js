@@ -79,7 +79,11 @@ function ChatbotScreen({ route, navigation }) {
    * Se genera un mensaje de saludo utilizando el modelo de IA.
    */
   const sendInitialMessage = async () => {
+<<<<<<< HEAD
     const prompt = `Debes evitar usar en las respuestas los "*", "**", "***", etc. Debes dar respuestas claras y directas. pero siempre enfocandote en el vehiculo que el usuario tiene y como consejos, prefiriendo siempre la vision de un profesional. Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${vehicle.año}. Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico.`;
+=======
+    const prompt = `Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${vehicle.año}. Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico.`;
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
 
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -146,12 +150,16 @@ function ChatbotScreen({ route, navigation }) {
           style={styles.speakerButton} 
           onPress={() => speakMessage(item.text)}
         >
+<<<<<<< HEAD
           <Icon 
             name="volume-medium"
             size={24} 
             color="#FFFFFF"
             style={styles.speakerIcon}
           />
+=======
+          <Icon name="volume-high-outline" size={24} color="white" />
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
         </TouchableOpacity>
       )}
     </View>
@@ -227,6 +235,7 @@ const styles = StyleSheet.create({
   },
   speakerButton: {
     marginLeft: 10,
+<<<<<<< HEAD
     padding: 5,
     borderRadius: 20,
     backgroundColor: 'rgba(0,0,0,0.2)', // Fondo semi-transparente
@@ -235,6 +244,8 @@ const styles = StyleSheet.create({
   },
   speakerIcon: {
     marginHorizontal: 5,
+=======
+>>>>>>> 423064b24f0fabcfa68185da5ab885d92d97dea2
   },
   inputContainer: {
     flexDirection: 'row',
