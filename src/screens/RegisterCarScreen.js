@@ -313,6 +313,22 @@ const RegisterCar = () => {
         );
       }
 
+      // Navegar a la pantalla de detalles del vehículo y pasar las fechas
+      navigation.navigate('VehicleDetail', {
+        vehicle: {
+          id: docRef.id,
+          marca,
+          modelo,
+          año,
+          patente: patenteCompleta,
+          documentDates: {
+            permisoCirculacion: documentDates.permisoCirculacion,
+            soap: documentDates.soap,
+            revisionTecnica: documentDates.revisionTecnica
+          }
+        }
+      });
+
       Alert.alert(
         'Éxito',
         'Vehículo registrado correctamente',

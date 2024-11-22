@@ -7,6 +7,27 @@ import RNBlobUtil from 'react-native-blob-util';
 import SubaruImage from '../assets/subaru.png';
 import Logo from '../assets/Logo.png';
 
+// Agregar esta función auxiliar al inicio del archivo, antes del componente
+const calcularDiasRestantes = (fechaVencimiento) => {
+  if (!fechaVencimiento) return null;
+  
+  const hoy = new Date();
+  const vencimiento = new Date(fechaVencimiento);
+  const diferencia = vencimiento - hoy;
+  const dias = Math.ceil(diferencia / (1000 * 60 * 60 * 24));
+  return dias;
+};
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return 'Fecha no disponible';
+  const date = new Date(fecha);
+  return date.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
 /**
  * Componente VehicleDetailScreen que muestra los detalles de un vehículo.
  * Permite al usuario ver documentos asociados y eliminar el vehículo.
@@ -19,6 +40,23 @@ const VehicleDetailScreen = ({ route, navigation }) => {
   const [showPdf, setShowPdf] = useState(false); // Estado para controlar la visualización del PDF
   const [localPdfPath, setLocalPdfPath] = useState(null); // Estado para almacenar la ruta local del PDF
   const [currentPage, setCurrentPage] = useState(1); // Estado para almacenar la página actual del PDF
+
+  const renderDiasRestantes = (fechaVencimiento) => {
+    const dias = calcularDiasRestantes(fechaVencimiento);
+    if (dias === null) return null;
+
+    let color = '#000000';
+    if (dias <= 30) color = '#ff0000';  // Rojo si faltan 30 días o menos
+    else if (dias <= 60) color = '#ffa500';  // Naranja si faltan 60 días o menos
+
+    return (
+      <Text style={[styles.diasRestantes, { color }]}>
+        {dias > 0 
+          ? `Faltan ${dias} días para vencer`
+          : `Vencido hace ${Math.abs(dias)} días`}
+      </Text>
+    );
+  };
 
   /**
    * Descarga y abre un documento PDF asociado al vehículo.
@@ -123,17 +161,34 @@ const VehicleDetailScreen = ({ route, navigation }) => {
             <Text style={styles.patenteText}>{vehicle.patente}</Text>
             <Text style={styles.detail}>Año: {vehicle.año}</Text>
             
-            <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('permisoCirculacion')}>
-              <Text style={styles.viewButtonText}>Ver Permiso de Circulación</Text>
-            </TouchableOpacity>
+            <View style={styles.documentContainer}>
+              <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('permisoCirculacion')}>
+                <Text style={styles.viewButtonText}>Ver Permiso de Circulación</Text>
+              </TouchableOpacity>
+              <Text style={styles.diasRestantes}>
+                {calcularDiasRestantes(vehicle.documentDates.permisoCirculacion) !== null 
+                  ? `Faltan ${calcularDiasRestantes(vehicle.documentDates.permisoCirculacion)} días para vencer`
+                  : 'Fecha no disponible'}
+              </Text>
 
-            <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('soap')}>
-              <Text style={styles.viewButtonText}>Ver SOAP</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('soap')}>
+                <Text style={styles.viewButtonText}>Ver SOAP</Text>
+              </TouchableOpacity>
+              <Text style={styles.diasRestantes}>
+                {calcularDiasRestantes(vehicle.documentDates.soap) !== null 
+                  ? `Faltan ${calcularDiasRestantes(vehicle.documentDates.soap)} días para vencer`
+                  : 'Fecha no disponible'}
+              </Text>
 
-            <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('revisionTecnica')}>
-              <Text style={styles.viewButtonText}>Ver Revisión Técnica</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('revisionTecnica')}>
+                <Text style={styles.viewButtonText}>Ver Revisión Técnica</Text>
+              </TouchableOpacity>
+              <Text style={styles.diasRestantes}>
+                {calcularDiasRestantes(vehicle.documentDates.revisionTecnica) !== null 
+                  ? `Faltan ${calcularDiasRestantes(vehicle.documentDates.revisionTecnica)} días para vencer`
+                  : 'Fecha no disponible'}
+              </Text>
+            </View>
 
             <TouchableOpacity 
               style={styles.chatbotButton} 
@@ -363,6 +418,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     color: 'white',
   },
+  documentContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  diasRestantes: {
+    textAlign: 'center',
+    marginTop: 5,
+    marginBottom: 15,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  fechaVencimiento: {
+    textAlign: 'center',
+    marginTop: 5,
+    marginBottom: 15,
+    fontSize: 14,
+    color: '#666666',
+    fontStyle: 'italic'
+  }
 });
 
 export default VehicleDetailScreen;
