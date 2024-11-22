@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#000000',
   },
   newConversationButton: {
     backgroundColor: '#001f3f',
@@ -172,6 +173,8 @@ const styles = StyleSheet.create({
   },
   conversationTitle: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
   },
   deleteButton: {
     backgroundColor: '#ff0000',

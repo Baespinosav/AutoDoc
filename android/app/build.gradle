@@ -75,14 +75,14 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 34
 
     namespace "com.grupo1.autodoc"
     defaultConfig {
         applicationId "com.grupo1.autodoc"
         minSdkVersion rootProject.ext.minSdkVersion
 
-        targetSdkVersion 31
+        targetSdkVersion 34
 
         targetSdkVersion rootProject.ext.targetSdkVersion
 

@@ -45,12 +45,8 @@ const VehicleDetailScreen = ({ route, navigation }) => {
     const dias = calcularDiasRestantes(fechaVencimiento);
     if (dias === null) return null;
 
-    let color = '#000000';
-    if (dias <= 30) color = '#ff0000';  // Rojo si faltan 30 días o menos
-    else if (dias <= 60) color = '#ffa500';  // Naranja si faltan 60 días o menos
-
     return (
-      <Text style={[styles.diasRestantes, { color }]}>
+      <Text style={[styles.diasRestantes, { color: '#000000' }]}>
         {dias > 0 
           ? `Faltan ${dias} días para vencer`
           : `Vencido hace ${Math.abs(dias)} días`}
@@ -165,7 +161,7 @@ const VehicleDetailScreen = ({ route, navigation }) => {
               <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('permisoCirculacion')}>
                 <Text style={styles.viewButtonText}>Ver Permiso de Circulación</Text>
               </TouchableOpacity>
-              <Text style={styles.diasRestantes}>
+              <Text style={[styles.diasRestantes, { color: '#000000' }]}>
                 {calcularDiasRestantes(vehicle.documentDates.permisoCirculacion) !== null 
                   ? `Faltan ${calcularDiasRestantes(vehicle.documentDates.permisoCirculacion)} días para vencer`
                   : 'Fecha no disponible'}
@@ -174,7 +170,7 @@ const VehicleDetailScreen = ({ route, navigation }) => {
               <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('soap')}>
                 <Text style={styles.viewButtonText}>Ver SOAP</Text>
               </TouchableOpacity>
-              <Text style={styles.diasRestantes}>
+              <Text style={[styles.diasRestantes, { color: '#000000' }]}>
                 {calcularDiasRestantes(vehicle.documentDates.soap) !== null 
                   ? `Faltan ${calcularDiasRestantes(vehicle.documentDates.soap)} días para vencer`
                   : 'Fecha no disponible'}
@@ -183,7 +179,7 @@ const VehicleDetailScreen = ({ route, navigation }) => {
               <TouchableOpacity style={styles.viewButton} onPress={() => downloadAndOpenPdf('revisionTecnica')}>
                 <Text style={styles.viewButtonText}>Ver Revisión Técnica</Text>
               </TouchableOpacity>
-              <Text style={styles.diasRestantes}>
+              <Text style={[styles.diasRestantes, { color: '#000000' }]}>
                 {calcularDiasRestantes(vehicle.documentDates.revisionTecnica) !== null 
                   ? `Faltan ${calcularDiasRestantes(vehicle.documentDates.revisionTecnica)} días para vencer`
                   : 'Fecha no disponible'}
@@ -428,6 +424,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 14,
     fontWeight: '500',
+    color: '#000000',
   },
   fechaVencimiento: {
     textAlign: 'center',
