@@ -34,8 +34,19 @@ npm install react-native-document-picker
 npm install react-native-pdf
 npm install react-native-blob-util
 npm install react-native-vector-icons
+npm install @react-native-async-storage/async-storage
+npm install react-native-tts
+npm install react-native-vector-icons
+npx react-native link react-native-tts
 npm install react-native-fs
 npm install react-native-html-to-pdf
+npm install @react-native-community/datetimepicker
+npm install @react-native-firebase/messaging
+npm install @react-native-firebase/app@20.5.0
+npm install @react-native-firebase/messaging@20.5.0
+npm install @notifee/react-native
+npm install react-native-vector-icons --save
+npm install
 ```
 
 ## Ejecución de la Aplicación
