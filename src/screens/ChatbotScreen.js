@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/Ionicons'; // Asegúrate de tener in
 
 LogBox.ignoreAllLogs(); // Ignora todos los warnings
 
-const API_KEY = 'AIzaSyBtBsTj7u59Sv2kyDRFwF_BRVWfV_UDyeU';
+const API_KEY = 'AIzaSyDR9Uym_genh_zzf8D7iRNNlXBw2ItH8SA';
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 /**
