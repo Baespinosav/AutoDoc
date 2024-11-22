@@ -79,7 +79,7 @@ function ChatbotScreen({ route, navigation }) {
    * Se genera un mensaje de saludo utilizando el modelo de IA.
    */
   const sendInitialMessage = async () => {
-    const prompt = `Debes evitar usar en las respuestas los "*", "**", "***", etc. Debes dar respuestas claras y directas. pero siempre enfocandote en el vehiculo que el usuario tiene y como consejos, prefiriendo siempre la vision de un profesional. Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${vehicle.año}. Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico.`;
+    const prompt = `Debes evitar colocar el texto en bold por ejemplo cuando colocas los "*", "**" y "***". y siempre intenta dar una respuesta que encuentres en el internet. Debes dar respuestas claras y directas. pero siempre enfocandote en el vehiculo que el usuario tiene y como consejos, prefiriendo siempre la vision de un profesional. Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${vehicle.año}. Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico.`;
 
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
