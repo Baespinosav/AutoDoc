@@ -517,15 +517,19 @@ const RegisterCar = () => {
 
       {/* Modal de carga */}
       <Modal
-        transparent={true}
         visible={isUploading}
-        animationType="slide"
+        transparent={true}
+        animationType="fade"
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Subiendo documentos...</Text>
-            <ProgressBarAndroid styleAttr="Horizontal" indeterminate={false} progress={uploadProgress / 100} />
-            <Text style={styles.progressText}>{uploadProgress.toFixed(2)}%</Text>
+            <Text style={styles.modalTitle}>Subiendo documentos</Text>
+            <ProgressBarAndroid
+              styleAttr="Horizontal"
+              indeterminate={false}
+              progress={uploadProgress / 100}
+            />
+            <Text style={styles.progressText}>{uploadProgress.toFixed(0)}%</Text>
           </View>
         </View>
       </Modal>
@@ -662,7 +666,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semi-transparente
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: 300,
@@ -675,10 +679,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#000000',
   },
   progressText: {
     marginTop: 10,
     fontSize: 16,
+    color: '#000000',
   },
   dateButton: {
     backgroundColor: '#f0f0f0',
