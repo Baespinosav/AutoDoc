@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { LogBox } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Tts from 'react-native-tts';
-import Icon from 'react-native-vector-icons/Ionicons'; // Asegúrate de tener instalado react-native-vector-icons
+import Icon from 'react-native-vector-icons/Ionicons';
 
-LogBox.ignoreAllLogs(); // Ignora todos los warnings
+LogBox.ignoreAllLogs();
 
 const API_KEY = 'AIzaSyDR9Uym_genh_zzf8D7iRNNlXBw2ItH8SA';
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-/**
- * Componente ChatbotScreen que maneja la interacción del usuario con el chatbot.
- * @param {Object} route - Las propiedades de la ruta, incluyendo el vehículo y el ID de la conversación.
- * @param {Object} navigation - Objeto de navegación para manejar la navegación entre pantallas.
- */
 function ChatbotScreen({ route, navigation }) {
   const { vehicle, conversationId } = route.params;
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [currentConversationId, setCurrentConversationId] = useState(conversationId);
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     if (currentConversationId) {
@@ -38,10 +34,12 @@ function ChatbotScreen({ route, navigation }) {
     };
   }, []);
 
-  /**
-   * Carga una conversación existente desde Firestore.
-   * Si la conversación existe, se actualiza el estado de los mensajes.
-   */
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
   const loadExistingConversation = async () => {
     const conversationRef = firestore().collection('chatbotConversations').doc(currentConversationId);
     const conversationDoc = await conversationRef.get();
@@ -50,10 +48,6 @@ function ChatbotScreen({ route, navigation }) {
     }
   };
 
-  /**
-   * Crea una nueva conversación en Firestore.
-   * Se inicializa con el ID del usuario y el ID del vehículo.
-   */
   const createNewConversation = async () => {
     const userId = auth().currentUser.uid;
     const newConversationRef = await firestore().collection('chatbotConversations').add({
@@ -66,21 +60,16 @@ function ChatbotScreen({ route, navigation }) {
     sendInitialMessage();
   };
 
-  /**
-   * Reproduce un mensaje utilizando Text-to-Speech (TTS).
-   * @param {string} message - El mensaje que se va a reproducir.
-   */
   const speakMessage = (message) => {
     Tts.speak(message);
   };
 
-  /**
-   * Envía un mensaje inicial al chatbot.
-   * Se genera un mensaje de saludo utilizando el modelo de IA.
-   */
   const sendInitialMessage = async () => {
-    const prompt = ` Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${vehicle.año}. 
-    Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico. Si no sabes la respuesta inventalo o di lo primero que encuentres en internet`;
+    const prompt = `El mensaje de bienvenida debe ser mas corto, sin tanta informacion, un "Hola, soy tu asistente virtual de vehiculos, como puedo ayudarte hoy con tu ${vehicle.marca} ${vehicle.modelo}?",  Eres un asistente virtual especializado en vehículos. El usuario tiene un ${vehicle.marca} ${vehicle.modelo} del año ${vehicle.año}. 
+    Saluda al usuario y ofrece tu ayuda para responder preguntas sobre este vehículo específico. Si no sabes la respuesta inventalo o di lo primero que encuentres en internet. 
+    Si el usuario te pregunta sobre el estado de los documentos del vehículo, responde con la fecha de vencimiento de cada uno de ellos. ,
+    haz que el usuario solo pueda preguntar cosas sobre el vehiculo, todas las preguntas que no sean sobre el vehiculo, debes ignorarlas y dile que pregunte cosas sobre el vehiculo.
+    Responde con la informacion cargada en tu memoria y de internet.`;
 
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -96,10 +85,6 @@ function ChatbotScreen({ route, navigation }) {
     }
   };
 
-  /**
-   * Envía un mensaje del usuario al chatbot.
-   * Genera una respuesta del chatbot utilizando el modelo de IA.
-   */
   const sendMessage = async () => {
     if (inputText.trim() === '') return;
 
@@ -124,21 +109,12 @@ function ChatbotScreen({ route, navigation }) {
     }
   };
 
-  /**
-   * Actualiza la conversación en Firestore con los mensajes actualizados.
-   * @param {Array} updatedMessages - La lista de mensajes actualizados.
-   */
   const updateFirestoreConversation = async (updatedMessages) => {
     await firestore().collection('chatbotConversations').doc(currentConversationId).update({
       messages: updatedMessages,
     });
   };
 
-  /**
-   * Renderiza un mensaje en la interfaz de usuario.
-   * @param {Object} item - El mensaje a renderizar.
-   * @returns {JSX.Element} El componente de mensaje.
-   */
   const renderMessage = ({ item }) => (
     <View style={[styles.messageBubble, item.isUser ? styles.userMessage : styles.botMessage]}>
       <Text style={styles.messageText}>{item.text}</Text>
@@ -158,24 +134,32 @@ function ChatbotScreen({ route, navigation }) {
     </View>
   );
 
+  const scrollToBottom = () => {
+    flatListRef.current.scrollToEnd({ animated: true });
+  };
+
+  const scrollToTop = () => {
+    flatListRef.current.scrollToIndex({ index: 0, animated: true });
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={90} // Ajusta este valor según sea necesario
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            <FlatList
-              data={messages}
-              renderItem={renderMessage}
-              keyExtractor={item => item.id.toString()}
-              style={styles.messageList}
-              contentContainerStyle={{ paddingBottom: 20 }} // Espacio extra para el teclado
-            />
-          </ScrollView>
-
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            renderItem={renderMessage}
+            keyExtractor={item => item.id.toString()}
+            style={styles.messageList}
+            contentContainerStyle={{ paddingBottom: 70 }}
+            keyboardShouldPersistTaps="handled"
+            onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })}
+          />
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -188,6 +172,14 @@ function ChatbotScreen({ route, navigation }) {
               <Text style={styles.sendButtonText}>Enviar</Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.scrollButtonsContainer}>
+            <TouchableOpacity style={styles.scrollButton} onPress={scrollToTop}>
+              <Icon name="arrow-up" size={30} color="#3498db" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.scrollButton} onPress={scrollToBottom}>
+              <Icon name="arrow-down" size={30} color="#3498db" />
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -198,9 +190,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
-  },
-  scrollViewContent: {
-    flexGrow: 1,
   },
   messageList: {
     flex: 1,
@@ -230,12 +219,9 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     padding: 5,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.2)', // Fondo semi-transparente
+    backgroundColor: 'rgba(0,0,0,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  speakerIcon: {
-    marginHorizontal: 5,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -254,7 +240,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginRight: 10,
-    color: '#000', // Color del texto (negro)
+    color: '#000',
   },
   sendButton: {
     backgroundColor: '#3498db',
@@ -266,6 +252,19 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  scrollButtonsContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'column',
+  },
+  scrollButton: {
+    backgroundColor: 'white',
+    borderRadius: 30,
+    padding: 10,
+    marginBottom: 5,
+    elevation: 5,
   },
 });
 
