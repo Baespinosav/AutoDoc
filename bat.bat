@@ -29,8 +29,9 @@ npm install react-native-fs
 npm install react-native-html-to-pdf
 npm install @react-native-community/datetimepicker
 npm install @react-native-firebase/messaging
-npm install @notifee/react-native
-npm install @notifee/react-native
+
+
+
 npm install @react-native-firebase/app@20.5.0
 npm install @react-native-firebase/messaging@20.5.0
 npm install @notifee/react-native
